@@ -1,0 +1,86 @@
+/* EJERCICIO 1 */
+
+/* Opcion 1 */
+
+/* let var x := "Hola Mundo\n" in (print(x);0) end */
+
+/* Opcion 2 */
+
+/* (print("Hola mundo\n");0) */
+
+/* EJERCICIO 2 */
+
+let type lista = {item : int, resto : lista}
+
+	  function cons(x:int, xs:lista):lista = lista{item = x, resto = xs}
+
+  	function length(xs:lista):int = if (xs = nil) then 0 else (1 + length(xs.resto))
+
+	  function first(xs:lista):int = xs.item
+
+	  function tail(xs:lista):lista = xs.resto
+
+	  function concat(xs:lista, ys:lista):lista = let var as:=xs in (while(as.resto<>nil) do as:=as.resto);as.resto = ys;xs end
+
+    var l1 := cons(1,cons(2,cons(3,nil)))
+
+    var l2 := cons(4,cons(5,cons(6,nil)))
+
+    function snoc(x:int, xs:lista):lista = if xs = nil then lista{item = x, resto = xs} else cons(xs.item,snoc(x,xs.resto))
+
+	  function filtra(x:int, xs:lista):lista = if (xs = nil) then xs else (if (xs.item = x) then filtra(x,xs.resto) else cons(xs.item, filtra(x,xs.resto)))
+
+    function isin(x:int, xs:lista):int = if (xs = nil) then 0 else (if (x = xs.item) then 1 else isin(x,xs.resto))
+
+    function remove(x:int,xs:lista):lista = if (isin(x,xs) = 0) then xs else (if (xs.item = x) then xs.resto else cons(xs.item, remove(x, xs.resto)))
+
+    function reverse(xs:lista):lista = if (xs = nil) then xs else snoc(xs.item,reverse(xs.resto))
+
+    function printInt(i:int) =
+      let function f(i:int) = if i>0 then (f(i/10);print(chr(i-i/10*10+ord("0"))))
+      in if i<0 then (print("-");f(-i))
+         else if i>0 then f(i)
+         else print("0")
+      end
+
+	  function printList(l:lista) = 
+      if l=nil then print("\n") else (printInt(l.item);print(" ");printList(l.resto))
+
+in (printList(l1);printList(remove(9,l1));0) end 
+
+
+/* EJERCICIO 3 */
+/*
+let
+	type tree = { key : int , children:treelist }
+	type treelist = {hd : tree , tl : treelist }
+	
+	function lengthTree(xs:treelist):int =  if (xs = nil) then 0 else (1 + lengthTree(xs.tl))
+	
+
+	function left(t:tree):tree = if (lengthTree(tree.children) >= 1) then t.children.hd else nil
+	function right(t:tree):tree = if (lengthTree(tree.children) >= 2) then t.children.tl.hd else nil
+	
+	function max(a:int, b:int):int = if(a >= b) then a else b
+	
+	function isBin(t:tree):int = if(t = nil | lengthTree(t.children) = 0) then 1 else (if(lengthTree(t.children) <= 2) then isBin(left(t)) & isBin(right(t)) else false)
+	
+
+	function height(t:tree):int = if (t.children = nil) then 1 else (if (lengthTree(t.children) = 1) then (1 + height(right(t))) else (1 + max(height(right(t)),height(left(t)))))
+	
+
+	function nodes(t:tree):int = if (t.children = nil) then 1 else (if (lengthTree(t.children) = 1) then (1 + height(right(t))) else (1 + height(right(t)) + height(left(t))))
+	
+	function sumatoria(n:int):int = if(n = 0) then 1 else (2^n + sumatoria(n-1))
+	
+
+	function checkNodes(h:int, n:int):int = if(n >= sumatoria(h-1) + 1 & n <= sumatoria(h)) return 1 else 0
+	
+
+	function checkHeight(t:tree):int = ....
+	
+	function isBComplete(t:tree):int = if( isBin(t) & checkNodes(height(t),nodes(t)) & checkLastLevel(t)) then 1 else 0
+in
+	0
+end
+*/

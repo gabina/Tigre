@@ -1,0 +1,1 @@
+type lista = {item:int, resto:lista}

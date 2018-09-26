@@ -1,0 +1,10 @@
+let
+  var a : int := 2
+  function c (t: int) : int =
+      let
+                      function d (i : int) : int = i
+                   in d(t+4)
+                   end
+
+in d(1)
+end

@@ -1,0 +1,22 @@
+/* correct if unit*/
+/*unit: anda bien*/
+/*(if (10 > 20) then (print("30")) else (print("40"));0)*/
+/* unit:anda bien*/
+/*(if (10 < 20) then (print("30")) else (print("40"));0)*/
+/*correct if exp*/
+/*exp: falla*/
+/*(if (10 > 20) then  (print("30");30) else (print("40");40))*/
+/*exp: anda bien*/
+/*(if (10 < 20) then  (print("30");30) else (print("40");40))*/
+
+
+/*
+let 
+	var a:= "e"
+in if("e"="e") then print("V") else print("F")
+   ; 0
+end
+*/
+(if("a"<>"a") then print("V") else print("F");0)
+
+

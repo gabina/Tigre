@@ -1,0 +1,6 @@
+/* an array type and an array variable  */
+let
+  var a : int := 4
+in
+  a
+end
