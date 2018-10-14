@@ -2,6 +2,7 @@
 
 structure Flow =
 struct
+	structure Graph
     datatype flowgraph = FGRAPH of {control: Graph.graph,
 				    def: Temp.temp list Graph.Table.table,
 				    use: Temp.temp list Graph.Table.table,
@@ -30,9 +31,12 @@ struct
 end
 
 sig 
-	val intr2graph: tigerassem.instr list -> Flow.flowgraph * Flow.Graph.node list
+	val instr2graph: tigerassem.instr list -> Flow.flowgraph * Flow.Graph.node list
 end
 
+
+fun instr2graph [] = FGRAPH{control = Graph.newGraph(), def= Graph.Table.tabNueva(), use = Graph.Table.tabNueva(),ismove = 
+	| instr2graph (x::xs) =
 (* Toma una lista de instrucciones y devuelve un grafo de flujo asociado con una lista de nodos que corresponden
    exactamente a las instrucciones. Las etiquetas jump sirven para generar las aristas de control de flujo.
    Ademas los use y def de cada nodo se pueden encontrar mediante las tablas de use y def de flowgraph *
