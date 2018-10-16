@@ -11,7 +11,7 @@ structure tigerflow = struct
 	fun fillNatToInstr (([],_) : tigerassem.instr list * int) = !natToInstr : (int, tigerassem.instr) Tabla
 		| fillNatToInstr (x::xs,n) = tabInserta (n,x,fillNatToInstr (xs,n+1))
 	
-	fun instrToSucc x
+	(*fun instrToSucc x*)
 	
 	
 

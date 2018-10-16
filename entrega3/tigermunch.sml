@@ -96,7 +96,7 @@ let
 										   in (emit(OPER {assem="cmp %'s0, %'s1\n",src=[munchExp e1,munchExp e2],dst=[],jump=NONE});
 										 	   emit(OPER {assem=res^" "^l1^"\n",src=[],dst=[],jump=SOME [l1,l2]}))
 										   end
-			| LABEL lab => emit(tigerassem.LABEL {assem=lab^":\n",lab=lab})
+			| LABEL lab => emit(asLABEL {assem=lab^":\n",lab=lab})
 			| EXP (CALL (NAME n,args)) => (munchArgs(0,args);(emit (OPER {assem="call "^n^"\n",src=[],dst=[],jump=NONE})))
 			| EXP (CALL (e,args)) => raise Fail "No deberia pasar CALL\n"
 			| _ => emit (OPER {assem = "Falta munchStm\n",src=[],dst=[],jump=NONE})
