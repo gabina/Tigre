@@ -37,8 +37,8 @@ let
 												   end
 			| MOVE (TEMP t, CALL(NAME e,args)) => (munchArgs (0,args); (emit (OPER {assem="CALL "^e^"\n",src=[],dst=[],jump=NONE})); 
 														     emit (OPER {assem = "movq %'d0, %rax\n",src=[], dst= [munchExp (TEMP t)], jump = NONE}))							   
-			| tigertree.MOVE (MEM(e1),e2) => emit (OPER {assem = "movq %'s1, (%'s0)\n",src=[munchExp e1, munchExp e2], dst= [], jump = NONE})
-			| tigertree.MOVE (TEMP i,e2) => emit (asMOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=i})
+			| MOVE (MEM(e1),e2) => emit (OPER {assem = "movq %'s1, (%'s0)\n",src=[munchExp e1, munchExp e2], dst= [], jump = NONE})
+			| MOVE (TEMP i,e2) => emit (asMOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=i})
 			| JUMP (NAME n, l) =>  emit (OPER {assem="jmp "^n^"\n",src=[],dst=[],jump=SOME l})
 			| JUMP (_, l) =>  emit (OPER {assem="NO COMPLETO jump\n",src=[],dst=[],jump=SOME l})
 			| CJUMP (oper,CONST i,CONST j,l1,l2) => let val res = case oper of
