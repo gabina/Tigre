@@ -34,6 +34,17 @@ structure tigerflow = struct
 		                         OPER {assem=a,dst=d,src=s,jump=j} => tabInserta(n,d,fillDefs(xs,n+1))
 		                         | LABEL {assem=a,lab=l} => tabInserta(n,[],fillDefs(xs,n+1))
 		                         | MOVE {assem=a,dst=d,src=s} => tabInserta(n,[d],fillDefs(xs,n+1))
+	(* alternativa
+	
+	defs = natToInstr
+	
+	fun fillDefs1 (i : tigerassem.instr) = case i of 
+											OPER {assem=a,dst=d,src=s,jump=j} => d
+											| LABEL {assem=a,lab=l} => []
+											| MOVE {assem=a,dst=d,src=s} => [d]
+	defs = tabAplica fillDefs1 defs
+	
+	*)
 	
 	fun fillUses (([],_) : tigerassem.instr list * int) = !uses : (int, temp list) Tabla
 		| fillUses (x::xs,n) = case x of 
@@ -41,13 +52,20 @@ structure tigerflow = struct
 		                         | LABEL {assem=a,lab=l} => tabInserta(n,[],fillUses(xs,n+1))
 		                         | MOVE {assem=a,dst=d,src=s} => tabInserta(n,[s],fillUses(xs,n+1))		
 	
+	(* alternativa 
 	
+	uses = natToInstr
+	fun fillUses1 (i : tigerassem.instr) = case i of 
+											OPER {assem=a,dst=d,src=s,jump=j} => s
+											| LABEL {assem=a,lab=l} => []
+											| MOVE {assem=a,dst=d,src=s} => [s]
+	uses = tabAplica fillUses1 uses
 	
 	fun findLabel (l : tigertemp.label) = (tabClaves(tabFiltra (fn i => (case i of 
 																			LABEL {assem=a,lab=l1} => ((l1 <= l) andalso (l1 >= l))
 																			| _ => false), !natToInstr))) : int list
 										
-	
+	*)
 	
 											
 	fun fillSuccs (([],_) : tigerassem.instr list * int) = !succs : (int, int list) Tabla
