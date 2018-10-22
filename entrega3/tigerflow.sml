@@ -16,6 +16,14 @@ structure tigerflow = struct
 	(* tabla que asocia nodos con sus sucesores *)
 	val succs: (int,int list) Tabla ref = ref (tabNueva())
 	
+	(**)
+	val liveOut : (int, temp list) Tabla ref = ref (tabNueva())
+	
+	val liveOutOld : (int, temp list) Tabla ref = ref (tabNueva())
+	(**)
+	val liveIn : (int, temp list) Tabla ref = ref (tabNueva())
+	val liveInOld : (int, temp list) Tabla ref = ref (tabNueva())
+	
 	(* funcion que "llena" natToInstr *)
 	
 	fun fillNatToInstr (([],_) : tigerassem.instr list * int) = !natToInstr : (int, tigerassem.instr) Tabla
@@ -26,47 +34,30 @@ structure tigerflow = struct
 		                         OPER {assem=a,dst=d,src=s,jump=j} => tabInserta(n,d,fillDefs(xs,n+1))
 		                         | LABEL {assem=a,lab=l} => tabInserta(n,[],fillDefs(xs,n+1))
 		                         | MOVE {assem=a,dst=d,src=s} => tabInserta(n,[d],fillDefs(xs,n+1))
-	(* alternativa
 	
-	defs = natToInstr
-	fun fillDefs1 (i : tigerassem.instr) = case i of 
-											OPER {assem=a,dst=d,src=s,jump=j} => d
-											| LABEL {assem=a,lab=l} => []
-											| MOVE {assem=a,dst=d,src=s} => [d]
-	defs = tabAplica fillDefs1 defs
-	
-	*)
 	fun fillUses (([],_) : tigerassem.instr list * int) = !uses : (int, temp list) Tabla
 		| fillUses (x::xs,n) = case x of 
-		                         OPER {assem=a,dst=d,src=s,jump=j} => tabInserta(n,d,fillUses(xs,n+1))
+		                         OPER {assem=a,dst=d,src=s,jump=j} => tabInserta(n,s,fillUses(xs,n+1))
 		                         | LABEL {assem=a,lab=l} => tabInserta(n,[],fillUses(xs,n+1))
-		                         | MOVE {assem=a,dst=d,src=s} => tabInserta(n,[d],fillUses(xs,n+1))		
-
-	(* alternativa (usa las mismas keys que la tabla original creo que igual nunca cambiaria pero por las dudas asi nos aseguramos	
-	
-	uses = natToInstr
-	fun fillUses1 (i : tigerassem.instr) = case i of 
-											OPER {assem=a,dst=d,src=s,jump=j} => s
-											| LABEL {assem=a,lab=l} => []
-											| MOVE {assem=a,dst=d,src=s} => [s]
-	uses = tabAplica fillUses1 uses
+		                         | MOVE {assem=a,dst=d,src=s} => tabInserta(n,[s],fillUses(xs,n+1))		
 	
 	
-											
-	fun auxiSuccs ((n,[],xs)) : (int * string list * int list) = xs 
-		| auxiSuccs (n,(x::xs),ys) = auxiSuccs(n,xs,((tabClaves(tabFiltra (fn i => case i of 
-																						LABEL {assem=a,lab=l} => if (l == x) then true else false
-																						| _ => false) natToInstr)) :: ys))
+	
+	fun findLabel (l : tigertemp.label) = (tabClaves(tabFiltra (fn i => (case i of 
+																			LABEL {assem=a,lab=l1} => ((l1 <= l) andalso (l1 >= l))
+																			| _ => false), !natToInstr))) : int list
+										
 	
 	
 											
 	fun fillSuccs (([],_) : tigerassem.instr list * int) = !succs : (int, int list) Tabla
 		| fillSuccs ((x::xs),n) = case x of 
-									OPER {assem=a,dst=d,src=s,jump=j} => case j of
+									OPER {assem=a,dst=d,src=s,jump=j} => (case j of
 																			NONE => tabInserta(n,[n+1],fillSuccs(xs,n+1))
-																			| SOME l => tabInserta (n,auxiSuccs (n,l,[n+1]),fillSuccs(xs,n+1))
-									| LABEL {assem=a,lab=l} => tabInserta(n,[n+1],fillSuccs(xs,n+1)) (*OK??*)
+																			| SOME l => tabInserta (n,List.concat ((List.map findLabel l) : int list list), fillSuccs(xs,n+1)))
+									| LABEL {assem=a,lab=l} => tabInserta(n,[n+1],fillSuccs(xs,n+1)) 
 									| MOVE {assem=a,dst=d,src=s} => tabInserta(n,[n+1],fillSuccs(xs,n+1))	
+									
+	fun fillInOut (outNueva,outVieja,inNueva,inVieja) = 
 	
-	*)
 end
