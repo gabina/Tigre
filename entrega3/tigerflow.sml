@@ -60,12 +60,12 @@ structure tigerflow = struct
 											| LABEL {assem=a,lab=l} => []
 											| MOVE {assem=a,dst=d,src=s} => [s]
 	uses = tabAplica fillUses1 uses
-	
+	*)
 	fun findLabel (l : tigertemp.label) = (tabClaves(tabFiltra (fn i => (case i of 
 																			LABEL {assem=a,lab=l1} => ((l1 <= l) andalso (l1 >= l))
 																			| _ => false), !natToInstr))) : int list
 										
-	*)
+	
 	
 											
 	fun fillSuccs (([],_) : tigerassem.instr list * int) = !succs : (int, int list) Tabla
@@ -76,6 +76,18 @@ structure tigerflow = struct
 									| LABEL {assem=a,lab=l} => tabInserta(n,[n+1],fillSuccs(xs,n+1)) 
 									| MOVE {assem=a,dst=d,src=s} => tabInserta(n,[n+1],fillSuccs(xs,n+1))	
 									
-	fun fillInOut (outNueva,outVieja,inNueva,inVieja) = 
+	
+	(*fun fillInOut (outNueva,outVieja,inNueva,inVieja) = *)
+	
+	val interf: (temp, temp list) Tabla ref = ref (tabNueva())
+	val adj: (temp, temp list) Tabla ref = ref (tabNueva())
+	
+	fun getAdj (t : temp) = (case (tabBusca (t,!adj)) of
+								NONE => raise Fail "No deberia pasar (temp no encontrado)"
+								| SOME l => l) : temp list
+	
+	fun areAdj ((t1,t2) : (temp * temp)) = (case (tabBusca (t1,!adj)) of
+												NONE => raise Fail "No deberia pasar (temp no encontrado)"
+												| SOME l => List.null (List.filter (fn e => ((e <= t2) andalso (e >= t2))) l)) : bool
 	
 end
