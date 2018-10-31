@@ -4,7 +4,7 @@ structure tigerflow = struct
 	open tigertemp
 	open tigertab
 	open Splayset
-	
+	(*HOLA*)
 	(* tabla que asocia enteros (nodos) con instrucciones *)
 	val natToInstr: (int, tigerassem.instr) Tabla ref = ref (tabNueva())	
 	
