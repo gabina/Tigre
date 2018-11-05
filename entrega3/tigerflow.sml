@@ -88,7 +88,7 @@ structure tigerflow = struct
 												| MOVE {assem=a,dst=d,src=s} => addList(empty,[d])) : temp set
 										end
 												
-	val defs = ref (fromTab (tabAAplica (id,fillDefs,!natToInstr)))
+	val defs = ref ((tabAAplica (id,fillDefs,!natToInstr)))
 	
 	
 	
@@ -102,7 +102,7 @@ structure tigerflow = struct
 												| MOVE {assem=a,dst=d,src=s} => addList(empty,[s])) : temp set
 										end
 												
-	val uses = ref (fromTab (tabAAplica (id,fillUses,!natToInstr)))
+	val uses = ref ((tabAAplica (id,fillUses,!natToInstr)))
 	
 	
 	
@@ -254,4 +254,52 @@ structure tigerflow = struct
 												
 	fun getDegree (t : temp) = List.length (getAdj t)
 	
+
+	fun getTemps (([],l) : (tigerassem.instr list * temp set)) = l : temp set
+		| getTemps ((x::xs,ts)) = case x of 
+								OPER {assem=a,dst=d,src=s,jump=j} => let 
+																		val _ = Splayset.addList (ts,s)
+																		val _ = Splayset.addList (ts,d)
+																	 in ts
+																	 end
+								| LABEL {assem=a,lab=l} => ts
+								| MOVE {assem=a,dst=d,src=s} => let
+																	val _ = add (ts,d)
+																	val _ = add (ts,s)
+																in
+																	ts
+																end
+	(*
+	fun fillInterf ([] : tigerassem.instr list) = !inferf : (temp, temp set) Tabla
+		| fillInterf (x:xs) = case x of 
+								OPER {assem=a,dst=d,src=s,jump=j} => 
+								| LABEL {assem=a,lab=l} => 
+								| MOVE {assem=a,dst=d,src=s} =>  
+	
+	*)
+	fun fillInterf ((0, tab) : (int * (temp, temp set) Tabla)) = let
+																	val i = buscoEnTabla (0, !natToInstr)
+																	val empty = empty String.compare
+																	fun findSet (t : temp) = (case tabBusca (t,tab) of
+																								NONE => empty
+																								| SOME c => c)
+																in 
+																	case i of 
+																		OPER {assem=a,dst=d,src=s,jump=j} => if (List.length d) = 0 then tab else List.foldl (fn (tmp,t) => tabInserta (tmp,union(findSet(tmp),buscoEnTabla(0,!liveOut)),t)) tab d
+																		| LABEL {assem=a,lab=l} => tab
+																		| MOVE {assem=a,dst=d,src=s} => tabInserta (d,difference(union(findSet(d),buscoEnTabla(0,!liveOut)),addList(empty,[s])),tab)
+																end
+		| fillInterf (n,tab) = let
+									val i = buscoEnTabla (n, !natToInstr)
+									val empty = empty String.compare
+									fun findSet (t : temp) = (case tabBusca (t,tab) of
+																NONE => empty
+																| SOME c => c)
+								in 
+									case i of 
+										OPER {assem=a,dst=d,src=s,jump=j} => if (List.length d) = 0 then fillInterf (n-1,tab) else fillInterf (n-1,List.foldl (fn (tmp,t) => tabInserta (tmp,union(findSet(tmp),buscoEnTabla(n,!liveOut)),t)) tab d)
+										| LABEL {assem=a,lab=l} => fillInterf (n-1,tab)
+										| MOVE {assem=a,dst=d,src=s} => fillInterf (n-1,tabInserta (d,difference(union(findSet(d),buscoEnTabla(n,!liveOut)),addList(empty,[s])),tab))
+								end
+
 end
