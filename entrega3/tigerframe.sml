@@ -21,26 +21,29 @@ open tigertree
 
 (*type level = int*)
 
-val fp = "FP"				(* frame pointer *)
-val sp = "SP"				(* stack pointer *)
-val rv = "RAX"				(* return value  *)
-val rdi ="RDI"
-val rsi = "RSI"
-val rdx = "RDX"
-val rcx = "RCX"
-val r8 = "R8"
-val r9 = "R9"
-val ov = "OV"				(* overflow value (edx en el 386) *)
-val wSz = 4					(* word size in bytes *)
-val log2WSz = 2				(* base two logarithm of word size in bytes *)
+val fp = "rbp"				(* frame pointer *)
+val sp = "sp"				(* stack pointer *)
+val rv = "rax"				(* return value  *)
+val rdi ="rdi"
+val rsi = "rsi"
+val rdx = "rdx"
+val rcx = "rcx"
+val r8 = "r8"
+val r9 = "r9"
+val ov = "ov"				(* overflow value (edx en el 386) *)
+val wSz = 8				(* word size in bytes *)
+val log2WSz = 3				(* base two logarithm of word size in bytes *)
 val fpPrev = 0				(* offset (bytes) *)
 val fpPrevLev = 8			(* offset (bytes) *)
+
 val argsInicial = 0			(* words *)
 val argsOffInicial = 0		(* words *)
 val argsGap = wSz			(* bytes *)
+
 val regInicial = 1			(* reg *)
 val localsInicial = 0		(* words *)
-val localsGap = ~4 			(* bytes *)
+val localsGap = ~8 			(* bytes *)
+
 val calldefs = [rv]
 val specialregs = [rv, fp, sp]
 val argregs = []
@@ -109,8 +112,8 @@ fun allocArg (f: frame) b =
 fun allocLocal (f: frame) b = 
 	case b of
 	true =>
-		let	val ret = InFrame(!(#actualLocal f)+localsGap)
-		in	#actualLocal f:=(!(#actualLocal f)-1); ret end
+		let	val ret = InFrame ((!(#actualLocal f)+localsInicial+1)*localsGap) (* REVISAR MULTIPLICAR *)
+		in	#actualLocal f:=(!(#actualLocal f)+1); ret end
 	| false => InReg(tigertemp.newtemp())
 
 (* Habría que verificar que esto ande correctamente *)

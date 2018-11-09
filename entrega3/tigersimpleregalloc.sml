@@ -2,25 +2,29 @@ structure tigersimpleregalloc :> tigersimpleregalloc =
 struct
 	structure frame = tigerframe
 	open tigerassem
+	open tigerframe
 	
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
 		(* COMPLETAR: Temporarios que ya tienen color asignado (p.ej, el temporario que representa a rax) *)
-		val precolored = ["a", "b", "c", "d", "e", "f"]
-		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
-		val asignables = ["b", "c", "d", "e", "f"]
+		val precolored = [rdi, rsi, rdx, rcx, r8, r9, fp]
+		
+		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. 
+		Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
+		val asignables = [rv, "rbx",rdi, rsi, rdx, rcx, r8, r9]
 		(* COMPLETAR: movaMem crea una instrucción que mueve un temporario a memoria. movaTemp, de memoria a un temporario.*)
 		fun movaMem(temp, mempos) =
 			let
-				val desp = if mempos<0 then " - " ^ Int.toString(~mempos) else if mempos>0 then " + " ^ Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then " +" ^ Int.toString(mempos) else ""
 			in
-				OPER {assem="mov `s0 M(a" ^ desp ^ ")", src=[temp], dst=[], jump=NONE}
+				OPER {assem="movq %'s0, " ^desp^ "(%rbp)", src=[temp], dst=[], jump=NONE}
+			
 			end
 		fun movaTemp(mempos, temp) =
 			let
-				val desp = if mempos<0 then " - " ^ Int.toString(~mempos) else if mempos>0 then " + " ^ Int.toString(mempos) else ""
+				val desp = if mempos<0 then " -" ^ Int.toString(~mempos) else if mempos>0 then " +" ^ Int.toString(mempos) else ""
 			in
-				OPER {assem="mov M(a" ^ desp ^ ") `d0", src=[], dst=[temp], jump=NONE}
+				OPER {assem="movq " ^desp^ "(%rbp), %'d0", src=[], dst=[temp], jump=NONE}
 			end
 		val temps =
 			let
@@ -37,14 +41,17 @@ struct
 			in
 				Splayset.listItems(Splayset.difference(s, precoloredSet))
 			end
-
+		fun printTempOff [] = print("-----------\n")
+				| printTempOff ((t,n)::xs) = (print("Temporalxx: "^t^" Offset: "^Int.toString(n)^"\n"); printTempOff xs)
+		
 		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true in (T, n) end) temps
+		val _ = (print("lista Inicial\n");printTempOff accesses)
 		fun getFramePos T =
 			let
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)
 				| gfp T ((a,b)::xs) = if a=T then b else gfp T xs
 			in
-				gfp T accesses
+				printTempOff accesses; gfp T accesses
 			end
 
 		fun rewriteInstr (OPER {assem, dst, src, jump}) =
