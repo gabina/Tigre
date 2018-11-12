@@ -54,21 +54,32 @@ fun main(args) =
 					tigerassem.OPER {assem=a,...} => a
 					| tigerassem.LABEL {assem=a,...} => a
 					| tigerassem.MOVE {assem=a,...} => a
-		val _ = print("CODEGEN\n")		
 		
 		fun id x = x
-		(*
-		val _ = map (fn (i) => print((tigerassem.format id i) ^ "\n"))
-		(List.concat (map (fn (s,f) => List.concat((map (fn (ss) => tigersimpleregalloc.simpleregalloc f (tigermunch.codeGen f ss)) s))) b))
-		*)
-		(*codeGen: frame tigertree.stm -> tigerassem.instr list *)
-		(* simpleRegAlloc: frame instr list -> instr list *)
 		
+		val _ = print("ANTES DEL COLOREO \n")
+		(*val _ = map (fn (i) => print((tigerassem.format id i) ^ "\n")) (List.concat ((map (fn (s,f) => List.concat(map (fn (ss) => tigermunch.codeGen f ss) s))) b)*)
 		fun apCode (lstm,f) = (f,List.concat(map (fn s => tigermunch.codeGen f s) lstm))
+		val l11 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)
+		val l12 = List.concat (map (fn (f,il) => il) l11)
+		val _ = map (fn (i) => print((tigerassem.format id i) ^ "\n")) l12
+		
+		
+		val _ = print("DESPUES DEL COLOREO \n")
+		(*fun apCode (lstm,f) = (f,List.concat(map (fn s => tigermunch.codeGen f s) lstm))*)
 		val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)
+		
 		val l2 = List.concat(map (fn (f,lin) => tigersimpleregalloc.simpleregalloc f lin) l1)
 		val _ = map (fn (i) => print((tigerassem.format id i) ^ "\n")) l2
+		(*codeGen: frame tigertree.stm -> tigerassem.instr list *)
+		(* simpleRegAlloc: frame instr list -> instr list *)
+		(*
+		fun apCode (lstm,f) = (f,List.concat(map (fn s => tigermunch.codeGen f s) lstm))
+		val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)
 		
+		val l2 = List.concat(map (fn (f,lin) => tigersimpleregalloc.simpleregalloc f lin) l1)
+		val _ = map (fn (i) => print((tigerassem.format id i) ^ "\n")) l2
+		*)
 		val _ = if inter then (tigerinterp.inter true b c) else ()
 		in 
 		print "yes!!\n"

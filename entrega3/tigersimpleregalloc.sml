@@ -7,7 +7,7 @@ struct
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =
 	let
 		(* COMPLETAR: Temporarios que ya tienen color asignado (p.ej, el temporario que representa a rax) *)
-		val precolored = [rdi, rsi, rdx, rcx, r8, r9, fp]
+		val precolored = [rdi, rsi, rdx, rcx, r8, r9, fp, rv]
 		
 		(* COMPLETAR: Temporarios que se pueden usar (p.ej, el temporario que representa a rax. 
 		Diferencia con precolored: el temporario que representa a rbp no se puede usar) *)
@@ -42,7 +42,7 @@ struct
 				Splayset.listItems(Splayset.difference(s, precoloredSet))
 			end
 		fun printTempOff [] = print("-----------\n")
-				| printTempOff ((t,n)::xs) = (print("Temporalxx: "^t^" Offset: "^Int.toString(n)^"\n"); printTempOff xs)
+				| printTempOff ((t,n)::xs) = (print("Temporal: "^t^" Offset: "^Int.toString(n)^"\n"); printTempOff xs)
 		
 		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true in (T, n) end) temps
 		val _ = (print("lista Inicial\n");printTempOff accesses)
@@ -51,7 +51,7 @@ struct
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)
 				| gfp T ((a,b)::xs) = if a=T then b else gfp T xs
 			in
-				printTempOff accesses; gfp T accesses
+				(*printTempOff accesses;*) gfp T accesses
 			end
 
 		fun rewriteInstr (OPER {assem, dst, src, jump}) =
