@@ -2,5 +2,5 @@
 let
   var a : int := 4
 in
-  a
+  ((if a = 4 then print("Correcto") else print("Incorrecto")); a)
 end

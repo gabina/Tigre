@@ -3,6 +3,8 @@ let
 	var a :=15
 
 	function g (a : int) : int = a 
+
+	var b := g(2)
 in
- g (2)
+ if b = 2 then print ("OK") else print ("nook"); 0
 end

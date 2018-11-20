@@ -60,6 +60,8 @@ fun main(args) =
 		
 		(***************************************************************************************)
 		fun id x = x
+		fun printLabels [] = print("\n")
+			| printLabels ((lab,s)::xs) = (print("Label: "^lab^" string: "^s^"\n") ; printLabels (xs))
 		fun apCode (lstm,f) = (f,List.concat(map (fn s => tigermunch.codeGen f s) lstm))
 		
 		val _ = if precolor then (let
@@ -70,6 +72,7 @@ fun main(args) =
 		
 		val _ = if color then (let 
 								val _ = print("DESPUES DEL COLOREO \n")
+								val _ = printLabels c
 								val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)		
 								val l2 = List.concat(map (fn (f,lin) => tigersimpleregalloc.simpleregalloc f lin) l1)
 							   in map (fn (i) => print((tigerassem.format id i) ^ "\n")) l2 end) else [()]

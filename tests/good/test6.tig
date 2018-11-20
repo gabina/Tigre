@@ -17,6 +17,6 @@ in if("e"="e") then print("V") else print("F")
    ; 0
 end
 */
-(if("a"<>"a") then print("V") else print("F");0)
+(if("a"="a") then print("V") else print("F");0)
 
 

@@ -96,6 +96,10 @@ const string consts[256] = {
 };
 string empty = {0, ""};
 
+string gigi = {1, "a"};
+
+string gabi = {1, "b"};
+
 
 long *_initArray(long size, long init)
 {

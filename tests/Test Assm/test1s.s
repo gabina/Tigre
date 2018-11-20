@@ -1,17 +1,17 @@
 .section	.rodata
 
 	.align 16
+	.type	L5, @object
+	.size	L5, 16
+	L5:
+		.quad 10
+		.ascii "InCorrecto"
+	.align 16
 	.type	L3, @object
 	.size	L3, 16
 	L3:
 		.quad 8
 		.ascii "Correcto"
-	.align 16
-	.type	L5, @object
-	.size	L5, 16
-	L5:
-		.quad 10
-		.ascii "Incorrecto"
 .section	.text.startup,"ax",@progbits
 .globl _tigermain
 .type _tigermain,@function
@@ -25,7 +25,7 @@ L10:
 
 movq $10, %rdi
 
-movq $5, %rsi
+movq $0, %rsi
 
 call _initArray
 
@@ -37,14 +37,14 @@ movq $1, %r8
 movq %r8,  -32(%rbp)
 movq  -8(%rbp), %rax
 movq %rax,  -16(%rbp)
-movq $0, %r8
+movq $1, %r8
 
 movq %r8,  -24(%rbp)
 movq  -16(%rbp), %rdi
 movq  -24(%rbp), %rsi
 call _checkIndexArray
 
-movq $5, %r8
+movq $0, %r8
 
 movq %r8,  -40(%rbp)
 movq  -16(%rbp), %rax
@@ -84,7 +84,7 @@ movq $0, %r8
 movq %r8,  -80(%rbp)
 movq  -32(%rbp), %r8
 movq  -80(%rbp), %r9
-cmpq %r8, %r9
+cmpq %r9, %r8
 
 jne L6
 
@@ -110,8 +110,8 @@ jmp L8
 
 L9:
 
-
 addq $1024,%rbp
 movq %rbp, %rsp
 popq %rbp
 ret
+
