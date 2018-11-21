@@ -1,8 +1,6 @@
 structure tigermunch :> tigermunch = struct
 
 open tigerassem
-val asMOVE = MOVE
-val asLABEL = LABEL
 open tigertemp
 open tigerframe
 open tigertree
@@ -37,7 +35,7 @@ let
 			| MOVE (TEMP t, CALL(NAME e,args)) 	=> (munchArgs (0,args); emit (OPER {assem="call "^e^"\n",src=[],dst=[],jump=NONE}); 
 																		emit (OPER {assem="movq %rax, %'d0\n",src=[],dst=[t],jump=NONE}))							   
 			| MOVE (MEM(e1),e2) 				=> emit (OPER {assem="movq %'s0, (%'s1)\n",src=[munchExp e2,munchExp e1],dst=[],jump=NONE})
-			| MOVE (TEMP i,e2) 					=> emit (asMOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=i})
+			| MOVE (TEMP i,e2) 					=> emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=i})
 			| JUMP (NAME n,l) 					=> emit (OPER {assem="jmp "^n^"\n",src=[],dst=[],jump=SOME l})
 			| JUMP (_, l) 						=> emit (OPER {assem="No deberia pasar (jump)\n",src=[],dst=[],jump=SOME l})
 			| CJUMP (oper,CONST i,CONST j,l1,l2)=> let val res = case oper of
@@ -100,7 +98,7 @@ let
 												   in (emit (OPER {assem="cmpq %'s0, %'s1\n",src=[munchExp e1,munchExp e2],dst=[],jump=NONE});
 										 	           emit (OPER {assem=res^" "^l1^"\n",src=[],dst=[],jump=SOME [l1,l2]}))
 										           end
-			| LABEL lab 						=> emit (asLABEL {assem=lab^":\n",lab=lab})
+			| LABEL lab 						=> emit (tigerassem.LABEL {assem=lab^":\n",lab=lab})
 			| EXP (CALL (NAME n,args)) 			=> (munchArgs(0,args);(emit (OPER {assem="call "^n^"\n",src=[],dst=[],jump=NONE})))
 			| EXP (CALL (e,args)) 				=> raise Fail "No deberia pasar (call)\n"
 			| _ 								=> emit (OPER {assem = "No hay mas casos (munchStm)\n",src=[],dst=[],jump=NONE})
@@ -113,11 +111,11 @@ let
 			| BINOP(PLUS,CONST i,CONST j) 	=> result (fn r => emit (OPER{assem="movq $"^its(i+j)^", %'d0\n",src=[],dst=[r],jump=NONE}))
 			| BINOP(MUL,CONST i,CONST j) 	=> result (fn r => emit (OPER{assem="movq $"^its(i*j)^", %'d0\n",src=[],dst=[r],jump=NONE}))
 			| BINOP(MINUS,CONST i,CONST j) 	=> result (fn r => emit (OPER{assem="movq $"^its(i-j)^", %'d0\n",src=[],dst=[r],jump=NONE}))						
-			| BINOP(PLUS,TEMP t,e1) 		=> result (fn r => (emit (asMOVE {assem="movq "^t^", %'d0\n",src=t,dst=r});
+			| BINOP(PLUS,TEMP t,e1) 		=> result (fn r => (emit (tigerassem.MOVE {assem="movq "^t^", %'d0\n",src=t,dst=r});
 																emit (OPER {assem="addq %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
-			| BINOP(MUL,TEMP t,e1) 			=> result (fn r => (emit (asMOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
+			| BINOP(MUL,TEMP t,e1) 			=> result (fn r => (emit (tigerassem.MOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
 																emit (OPER {assem="imul %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
-			| BINOP(MINUS,TEMP t,e1) 		=> result (fn r => (emit (asMOVE {assem="movq "^t^", %'d0\n",src=t,dst=r});
+			| BINOP(MINUS,TEMP t,e1) 		=> result (fn r => (emit (tigerassem.MOVE {assem="movq "^t^", %'d0\n",src=t,dst=r});
 																emit (OPER {assem="subq %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
 			
 			(*mover el int a un registro y luego sumar entre registros*)  
@@ -133,33 +131,33 @@ let
 																emit (OPER {assem="subq %'s0, %'d0\n",src=[r],dst=[munchExp e],jump=NONE})))
 			| BINOP (MUL,CONST i,e)		 	=> result (fn r => (emit (OPER {assem="movq $"^its(i)^"%'d0\n",src=[],dst=[r],jump=NONE});
 																emit (OPER {assem="imul %'s0, %'d0\n",src=[r],dst=[munchExp e],jump=NONE})))												
-			| BINOP(PLUS,e1, TEMP t) 		=> result (fn r => (emit (asMOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
+			| BINOP(PLUS,e1, TEMP t) 		=> result (fn r => (emit (tigerassem.MOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
 																emit (OPER{assem="addq %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
-			| BINOP(MINUS,e1, TEMP t) 		=> result (fn r => (emit (asMOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
+			| BINOP(MINUS,e1, TEMP t) 		=> result (fn r => (emit (tigerassem.MOVE {assem = "movq "^t^", %'d0\n",src=t,dst=r});
 																emit (OPER{assem="subq %'s0, %'d0\n",src=[munchExp e1],dst=[r],jump=NONE})))
-			| BINOP(MUL,e1, TEMP t) 		=> result (fn r => (emit (asMOVE {assem = "movq $"^t^", %'d0\n",src=t,dst=r});
+			| BINOP(MUL,e1, TEMP t) 		=> result (fn r => (emit (tigerassem.MOVE {assem = "movq $"^t^", %'d0\n",src=t,dst=r});
 																emit (OPER{assem="imul %'s0, %'d0\n",src=[munchExp e1],dst=[r],jump=NONE})))  
 																										 
 			(*guardar () en r y luego sumar r con el entero y el resultado va en r*)
-			| BINOP(PLUS,MEM e,CONST i) 	=> result (fn r => (emit (asMOVE {assem ="movq (%'s0), %'d0\n",src=(munchExp e),dst=r});
+			| BINOP(PLUS,MEM e,CONST i) 	=> result (fn r => (emit (OPER {assem ="movq (%'s0), %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
 																emit (OPER {assem="addq $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE})))
-			| BINOP(MINUS,MEM e,CONST i) 	=> result (fn r => (emit (asMOVE {assem ="movq (%'s0), %'d0\n",src=(munchExp e),dst=r});
+			| BINOP(MINUS,MEM e,CONST i) 	=> result (fn r => (emit (OPER {assem ="movq (%'s0), %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
 																emit (OPER {assem="subq $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE})))	                                           
-			| BINOP(MUL,MEM e,CONST i) 		=> result (fn r => (emit (asMOVE {assem ="movq (%'s0), %'d0\n",src=(munchExp e),dst=r});
+			| BINOP(MUL,MEM e,CONST i) 		=> result (fn r => (emit (OPER {assem ="movq (%'s0), %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
 																emit (OPER {assem="imul $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE})))
 			
 			| BINOP(DIV,e1,e2) 				=> result (fn r => emit (OPER {assem="movq %'s0,%'d0; cqto; idiv %'s1; movq %'s2, %'d1\n",src=[munchExp e2,munchExp e2, tigerframe.rv],dst=[tigerframe.rv,r,tigerframe.rdx],jump=NONE}))
 			 
 			(*| BINOP (PLUS,e1,e2) => result (fn r => emit (OPER {assem= "movq %'s0, %'d0; "}))                                          *)
 			| MEM (CONST i)					=> result (fn r => emit (OPER {assem="movq ($"^its(i)^"), %'d0\n",src=[],dst=[r],jump=NONE}))
-			| MEM (BINOP(PLUS,e1,CONST i)) 	=> result (fn r => emit (asMOVE {assem="movq (%'s0+"^ its(i)^"), %'d0\n",src=(munchExp e1),dst=r}))						
-			| MEM (BINOP(PLUS,CONST i,e1)) 	=> result (fn r => emit (asMOVE {assem="movq (%'s0+"^ its(i)^"), %'d0\n",src=(munchExp e1),dst=r}))						
+			| MEM (BINOP(PLUS,e1,CONST i)) 	=> result (fn r => emit (OPER {assem="movq (%'s0+"^ its(i)^"), %'d0\n",src=[munchExp e1],dst=[r],jump=NONE}))						
+			| MEM (BINOP(PLUS,CONST i,e1)) 	=> result (fn r => emit (OPER {assem="movq (%'s0+"^ its(i)^"), %'d0\n",src=[munchExp e1],dst=[r],jump=NONE}))						
 			(*| MEM (BINOP(PLUS,TEMP t,CONST i)) => result (fn r => emit (OPER {assem = "Este es el caso munchExp 4\n",src=[],dst=[],jump=NONE}))	*)					
-			| MEM (e1) 						=> result(fn r 	=> emit(asMOVE {assem="movq (%'s0), %'d0\n",src=(munchExp e1),dst=r}))	
+			| MEM (e1) 						=> result(fn r 	=> emit(OPER {assem="movq (%'s0), %'d0\n",src=[munchExp e1],dst=[r],jump=NONE}))	
 			| _ 							=> result (fn r => emit (OPER {assem="No hay mas casos (munchExp)\n",src=[],dst=[],jump=NONE}))
 		    
 	and munchArgs ((_,[]) : (int * exp list)) : unit = ()
-		| munchArgs (n,((TEMP x)::xs)) 		= ((if (n<6) then emit (asMOVE {assem = "movq %'s0, %"^(natToReg n)^"\n",src=(munchExp (TEMP x)),dst=(natToReg n)}) 
+		| munchArgs (n,((TEMP x)::xs)) 		= ((if (n<6) then emit (tigerassem.MOVE {assem = "movq %'s0, %"^(natToReg n)^"\n",src=(munchExp (TEMP x)),dst=(natToReg n)}) 
 														 else emit (OPER {assem = "pushq %'s0\n",src=[munchExp (TEMP x)],dst=[],jump=NONE})); munchArgs(n+1,xs))
 		| munchArgs (n,((CONST i)::xs)) 	= ((if (n<6) then emit (OPER {assem = "movq $"^its(i)^", %"^(natToReg n)^"\n",src=[],dst=[natToReg n],jump=NONE}) 
 														 else emit (OPER {assem = "pushq $"^its(i)^"\n",src=[],dst=[],jump=NONE})); munchArgs(n+1,xs))
@@ -167,7 +165,7 @@ let
 														 else emit (OPER {assem = "pushq $"^l^"\n",src=[],dst=[],jump=NONE})); munchArgs(n+1,xs))
 		| munchArgs (n,(MEM(CONST i))::xs) 	= ((if (n<6) then emit (OPER {assem = "movq $"^its(i)^", %"^(natToReg n)^"\n",src=[],dst=[natToReg n],jump=NONE}) 
 														 else emit (OPER {assem = "pushq $"^its(i)^"\n",src=[],dst=[],jump=NONE})); munchArgs(n+1,xs))										
-		| munchArgs (n,(MEM e)::xs) 		= ((if (n<6) then emit (asMOVE {assem = "movq (%'s0), %"^(natToReg n)^"\n",src=(munchExp e),dst=(natToReg n)}) 
+		| munchArgs (n,(MEM e)::xs) 		= ((if (n<6) then emit (OPER {assem = "movq (%'s0), %"^(natToReg n)^"\n",src=[munchExp e],dst=[natToReg n],jump=NONE}) 
 										                 else emit (OPER {assem = "pushq (%'s0)\n",src=[munchExp e],dst=[],jump=NONE})); munchArgs(n+1,xs))
 		| munchArgs (n,(BINOP(PLUS,CONST i,CONST j)::xs)) = 	((if (n<6) then emit (OPER {assem = "movq $"^its(i+j)^", %"^(natToReg n)^"\n",src=[],dst=[natToReg n],jump=NONE}) 
 										                 else emit (OPER {assem = "pushq $"^its(i+j)^"\n",src=[],dst=[],jump=NONE})); munchArgs(n+1,xs))
@@ -178,30 +176,30 @@ let
 		| munchArgs (n,(BINOP(DIV,e1,e2))::xs) = ((if (n<6) then emit (OPER {assem="movq %'s0,%'d0; cqto; idiv %'s1; movq %'s2, %'d1; movq %rax, %"^(natToReg n)^"\n",src=[munchExp e1,munchExp e2, tigerframe.rv],dst=[natToReg n,tigerframe.rv,tigerframe.rdx],jump=NONE}) 
 		                                                    else emit (OPER {assem="movq %'s0,%'d0; cqto; idiv %'s1; movq %'s2, %'d1; pushq %rax\n",src=[munchExp e1,munchExp e2, tigerframe.rv],dst=[tigerframe.rv,tigerframe.rdx],jump=NONE})))								                 							                 					
 		| munchArgs (n,(BINOP(PLUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem ="addq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													emit (asMOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													emit (tigerassem.MOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 											  else (emit (OPER {assem ="addq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													(emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs))
 													
 		| munchArgs (n,(BINOP(MUL,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem ="imul %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													emit (asMOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													emit (tigerassem.MOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 											  else (emit (OPER {assem ="imul %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													(emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs)) 
 		| munchArgs (n,(BINOP(MINUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem ="subq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													emit (asMOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													emit (tigerassem.MOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 											  else (emit (OPER {assem ="subq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													(emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs))
 	    | munchArgs (n,(BINOP(PLUS,e1,TEMP t))::xs) = ((if (n<6) then (emit (OPER {assem ="addq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													emit (asMOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													emit (tigerassem.MOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 											  else (emit (OPER {assem ="addq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													(emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs))
 													
 		| munchArgs (n,(BINOP(MUL,e1,TEMP t))::xs) = ((if (n<6) then (emit (OPER {assem ="imul %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													emit (asMOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													emit (tigerassem.MOVE{assem="movq "^t^", %"^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 											  else (emit (OPER {assem ="imul %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													(emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs))
 													
 		| munchArgs (n,(BINOP(MINUS,e1,TEMP t))::xs) = ((if (n<6) then (emit (OPER {assem ="subq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
-													                    emit (asMOVE{assem="movq "^t^", "^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
+													                    emit (tigerassem.MOVE{assem="movq "^t^", "^(natToReg n)^"\n",src=t, dst=(natToReg n)}))
 		       									                  else (emit (OPER {assem ="subq %'s0, "^t^"\n",src=[munchExp e1], dst=[t],jump=NONE});
 													                   (emit (OPER{assem="pushq "^t^"\n",src=[],dst=[],jump=NONE}))));munchArgs(n+1,xs))										
 		

@@ -1,7 +1,7 @@
 structure tigersimpleregalloc :> tigersimpleregalloc =
 struct
 	structure frame = tigerframe
-	open tigerassem
+	open tigerassem	
 	open tigerframe
 	
 	fun simpleregalloc (frm:frame.frame) (body:instr list) =

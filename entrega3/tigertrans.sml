@@ -366,12 +366,14 @@ let
 	val r = unEx right
 	val (t,f,tmp) = (newlabel(), newlabel(), newtemp())
 in
+(*
 	Ex (ESEQ(seq[MOVE(TEMP tmp, CONST 1),
 			CJUMP(etiq,l,r,t,f),
 		    LABEL f,
 		    MOVE(TEMP tmp, CONST 0),
 		    LABEL t],
-		    TEMP tmp))
+		    TEMP tmp))*)
+	Cx (fn (t,f) => CJUMP(etiq,l,r,t,f))
 end	
 
 fun binOpStrExp {left, oper, right} =
@@ -386,12 +388,12 @@ fun binOpStrExp {left, oper, right} =
 			| MinusOp 	=> raise Fail "no deberia llegar"
 			| TimesOp 	=> raise Fail "no deberia llegar"
 			| DivideOp 	=> raise Fail "no deberia llegar"				
-			| _		=> Ex (ESEQ(seq[MOVE(TEMP tmp, CONST 1),
-								CJUMP(etiq,externalCall("_stringcmp", [l , r]),CONST 0,t,f),
+			| _		=> Cx (fn (t,f) => CJUMP(etiq,externalCall("_stringcmp", [l , r]),CONST 0,t,f))(*Ex (ESEQ(seq[MOVE(TEMP tmp, CONST 1),
+								CJUMP(etiq,,CONST 0,t,f),
 								LABEL f,
 								MOVE(TEMP tmp, CONST 0),
 								LABEL t],
-								TEMP tmp))	
+								TEMP tmp))	*)
 			
 			(*| _ => raise Fail "No existe caso binOpStrExp"*)
 			

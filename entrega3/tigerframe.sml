@@ -127,5 +127,8 @@ fun exp (InFrame k) e = MEM(BINOP(PLUS, getFrame e, CONST k))
 
 fun externalCall(s, l) = CALL(NAME s, l)
 
-fun procEntryExit1 (frame,body) = body
+fun procEntryExit1 (frame,body) = let 
+					val siz = List.length(!(#arguments frame))
+				  in body end (* HAY QUE COMPLETAR ESTA FUNCION PARA QUE META LOS ARGUMENTOS DE LA FUNCION QUE ES LLAMADA EN LOS REGISTROS CORRESPONDIENTES
+NO SE QUE HAY QUE HACER CON EL STATIC LINK*)
 end

@@ -35,39 +35,20 @@ movq $100, %r8
 movq %r8,  -24(%rbp)
 movq  -16(%rbp), %r8
 movq  -24(%rbp), %r9
-cmpq %r9, %r8
+cmpq %r8, %r9
 
 jle L1
 
 L0:
 
-movq $1, %r8
+movq $99, %r8
 
 movq %r8,  -32(%rbp)
-movq $101, %r8
-
-movq %r8,  -40(%rbp)
 movq  -8(%rbp), %r8
-movq  -40(%rbp), %r9
-cmpq %r9, %r8
+movq  -32(%rbp), %r9
+cmpq %r8, %r9
 
-je L3
-
-L4:
-
-movq $0, %r8
-
-movq %r8,  -32(%rbp)
-L3:
-
-movq $0, %r8
-
-movq %r8,  -48(%rbp)
-movq  -32(%rbp), %r8
-movq  -48(%rbp), %r9
-cmpq %r9, %r8
-
-jne L9
+je L9
 
 L10:
 
@@ -83,6 +64,26 @@ jmp L12
 L1:
 
 movq  -8(%rbp), %rax
+movq %rax,  -40(%rbp)
+movq $1, %r8
+
+movq %r8,  -48(%rbp)
+movq  -48(%rbp), %r9
+movq  -40(%rbp), %r8
+addq %r9, %r8
+
+movq %r8,  -40(%rbp)
+movq  -40(%rbp), %rax
+movq %rax,  -8(%rbp)
+movq  -16(%rbp), %r8
+movq  -24(%rbp), %r9
+cmpq %r8, %r9
+
+je L0
+
+L2:
+
+movq  -16(%rbp), %rax
 movq %rax,  -56(%rbp)
 movq $1, %r8
 
@@ -93,26 +94,6 @@ addq %r9, %r8
 
 movq %r8,  -56(%rbp)
 movq  -56(%rbp), %rax
-movq %rax,  -8(%rbp)
-movq  -16(%rbp), %r8
-movq  -24(%rbp), %r9
-cmpq %r9, %r8
-
-je L0
-
-L2:
-
-movq  -16(%rbp), %rax
-movq %rax,  -72(%rbp)
-movq $1, %r8
-
-movq %r8,  -80(%rbp)
-movq  -80(%rbp), %r9
-movq  -72(%rbp), %r8
-addq %r9, %r8
-
-movq %r8,  -72(%rbp)
-movq  -72(%rbp), %rax
 movq %rax,  -16(%rbp)
 jmp L1
 
@@ -125,6 +106,7 @@ call print
 jmp L11
 
 L12:
+
 
 
 addq $1024,%rbp

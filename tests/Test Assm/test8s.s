@@ -4,8 +4,8 @@
 	.type	L4, @object
 	.size	L4, 16
 	L4:
-		.quad 2
-		.ascii "OK"
+		.quad 3
+		.ascii "OK\n"
 	.align 16
 	.type	L6, @object
 	.size	L6, 16
@@ -21,18 +21,17 @@
 L0:
 pushq %rbp
 movq %rsp, %rbp
-subq $1024,%rbp
+subq $1024,%rsp
 
+movq %rsi, -8(%rbp)
 movq  -8(%rbp), %rax
 jmp L12
 
 L12:
 
-addq $1024,%rbp
 movq %rbp, %rsp
 popq %rbp
 ret
-
 
 
 .globl _tigermain
@@ -41,7 +40,7 @@ ret
 _tigermain:
 pushq %rbp
 movq %rsp, %rbp
-subq $1024,%rbp
+subq $1024,%rsp
 
 L11:
 
@@ -107,7 +106,6 @@ jmp L9
 
 L10:
 
-addq $1024,%rbp
 movq %rbp, %rsp
 popq %rbp
 ret
