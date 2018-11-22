@@ -66,6 +66,7 @@ type register = string
 
 datatype frag = PROC of {body: tigertree.stm, frame: frame}
 	| STRING of tigertemp.label * string
+
 fun newFrame{name, nameViejo,formals} = {
 	name=name,
 	nameViejo=nameViejo,
@@ -127,8 +128,24 @@ fun exp (InFrame k) e = MEM(BINOP(PLUS, getFrame e, CONST k))
 
 fun externalCall(s, l) = CALL(NAME s, l)
 
-fun procEntryExit1 (frame,body) = let 
-					val siz = List.length(!(#arguments frame))
-				  in body end (* HAY QUE COMPLETAR ESTA FUNCION PARA QUE META LOS ARGUMENTOS DE LA FUNCION QUE ES LLAMADA EN LOS REGISTROS CORRESPONDIENTES
-NO SE QUE HAY QUE HACER CON EL STATIC LINK*)
+fun seq [] = EXP (CONST 0)
+	| seq [s] = s
+	| seq (x::xs) = SEQ (x, seq xs)
+
+fun procEntryExit1 (f : frame,body) =  let
+					    fun zipear [] _ = []
+					    | zipear (x::xs) n = [(x,n)] @ zipear xs (n+1)
+					val lacc = zipear (!(#arguments f)) 0	
+					fun natToReg 0 = rdi
+					| natToReg 1 = rsi
+					| natToReg 2 = rdx
+					| natToReg 3 = rcx
+					| natToReg 4 = r8
+					| natToReg 5 = r9
+					| natToReg _ = raise Fail "No deberia pasar (natToReg)"				
+					fun accToMove ((InReg t),n) = if n<6 then MOVE (TEMP t,TEMP (natToReg n)) else MOVE(TEMP t,TEMP t)(*else MOVE(t,(*push*))*)
+						| accToMove ((InFrame k),n) = if n<6 then MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n)) else MOVE (TEMP fp,TEMP fp)                                        
+					val listMoves =map accToMove lacc
+
+				   in  SEQ (seq listMoves,body) end
 end

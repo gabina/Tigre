@@ -13,6 +13,7 @@
 		.quad 4
 		.ascii "nook"
 
+
 .section	.text.startup,"ax",@progbits
 
 .globl L0
