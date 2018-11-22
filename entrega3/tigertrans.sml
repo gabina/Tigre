@@ -129,6 +129,15 @@ fun stringExp(s: string) =
 		val str = (*".string \""^*)s(*^"\"" : string (* .string "dia" *)*)
 		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, (*len), STRING("",*) str)])
 	in	Ex(NAME l) end
+(*
+original
+fun stringExp(s: string) =
+	let	val l = newlabel()
+		val len = ".long "^makestring(stringLen s) : string (* .long 3*)
+		val str = ".string \""^s^"\"" : string (* .string "dia" *)
+		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
+in	Ex(NAME l) end
+	*)
 	
 fun preFunctionDec() =
 	(pushSalida(NONE);
@@ -206,7 +215,6 @@ end
 fun callExp(name,ext,isproc,lev : level, ls : exp list) = 
 let	
 	val dif = getActualLev() - levInt (lev)	
-	(* val _ = print ("LA DIFERENCIA DEL CALL A "^name^" ES "^Int.toString(dif)^"\n") *)
 	
 	fun calcSL 0 = MEM (BINOP (PLUS, TEMP fp, CONST (tigerframe.fpPrev)))
 		| calcSL n = MEM (BINOP (PLUS, calcSL (n-1), CONST (tigerframe.fpPrev)))
