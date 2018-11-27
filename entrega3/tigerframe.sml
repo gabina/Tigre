@@ -77,8 +77,8 @@ fun newFrame{name, nameViejo,formals} = {
 	actualLocal=ref localsInicial,
 	actualReg=ref regInicial
 }
-fun name(f: frame) = #name f
-fun nameViejo(f: frame) = #nameViejo f
+fun name (f: frame) = #name f
+fun nameViejo (f: frame) = #nameViejo f
 (* Representación de Tiger de un string
    "3dia\n"*)
 fun string(l, s) = l^tigertemp.makeString(s)^"\n"
