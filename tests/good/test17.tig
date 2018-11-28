@@ -11,5 +11,5 @@ let
   var lis : intlist := intlist { hd = 11, tl = nil }
 
 in
-  lis.hd
+  if lis.hd = 11 then print("OK") else print("NOOK");0
 end
