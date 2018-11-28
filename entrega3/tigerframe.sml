@@ -137,7 +137,7 @@ fun procEntryExit1 (f : frame,body) =  let
 					    fun zipear [] _ = []
 					    | zipear (x::xs) n = [(x,n)] @ zipear xs (n+1)
 						
-						val lacc = zipear (!(#arguments f)) 0	
+						val lacc : (access * int) list = zipear (formals f) 0	
 						
 						fun natToReg 0 = rdi
 						| natToReg 1 = rsi
@@ -149,6 +149,7 @@ fun procEntryExit1 (f : frame,body) =  let
 						
 						fun accToMove ((InReg t),n) = if n<6 then MOVE (TEMP t,TEMP (natToReg n)) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST ((n-6)*localsGap))))(*else MOVE(t,(*push*))*)
 						    | accToMove ((InFrame k),n) = if n<6 then MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n)) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST ((n-6)*localsGap))))                                        
+						val _ = print ("LLL"^Int.toString (length lacc) ^"\n")
 						val listMoves =map accToMove lacc
 
 				   in  SEQ (seq listMoves,body) end

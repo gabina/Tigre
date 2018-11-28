@@ -109,13 +109,20 @@ in
 end
 
 val datosGlobs = ref ([]: frag list)
-
+(* original
 fun procEntryExit{level: level, body} =
 	let	val label = STRING(name(#frame level), "")
 		val body' = PROC{frame= #frame level, body=unNx body}
 		val final = STRING(";;-------", "")
 	in	datosGlobs:=(!datosGlobs@[label, body', final]) end
+*)
+fun procEntryExit{level: level, body} =
+	let	val body' = PROC{frame= #frame level, body=unNx body}		
+	in	datosGlobs:=(!datosGlobs@[body']) end
+
+
 fun getResult() = !datosGlobs
+
 
 fun stringLen s =
 	let	fun aux[] = 0
@@ -125,20 +132,16 @@ fun stringLen s =
 
 fun stringExp(s: string) =
 	let	val l = newlabel()
-		val len = ".long "^makestring(stringLen s) : string (* .long 3*)
-		val str = (*".string \""^*)s(*^"\"" : string (* .string "dia" *)*)
-		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, (*len), STRING("",*) str)])
+		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, s)])
 	in	Ex(NAME l) end
 (*
-original
 fun stringExp(s: string) =
 	let	val l = newlabel()
 		val len = ".long "^makestring(stringLen s) : string (* .long 3*)
 		val str = ".string \""^s^"\"" : string (* .string "dia" *)
 		val _ = datosGlobs:=(!datosGlobs @ [STRING(l, len), STRING("", str)])
 in	Ex(NAME l) end
-	*)
-	
+*)	
 fun preFunctionDec() =
 	(pushSalida(NONE);
 	actualLevel := !actualLevel+1)
@@ -327,7 +330,7 @@ let
 	val cf = unCx test
 	val expthen = unNx then'
 	val expelse = unNx else'
-	val (t,f,fin) = (newlabel(),newlabel(),newlabel())
+	val (t,f,fin) = (newlabel(),newlabel(),newlabel())	
 in
 	Nx (seq[cf(t,f),
 			LABEL t,

@@ -82,7 +82,7 @@ fun transExp((venv, tenv, levNest) : ( venv * tenv * tigertrans.level)) : (tiger
 		| trexp(UnitExp _) = {exp=unitExp(), ty=TUnit}
 		| trexp(NilExp _)= {exp=nilExp(), ty=TNil}
 		| trexp(IntExp(i, _)) = {exp=intExp i, ty=TInt}
-		| trexp(StringExp(s, _)) = {exp=stringExp(s), ty=TString}
+		| trexp(StringExp(s, _)) = {exp=stringExp(s), ty=TString} 
 		| trexp(CallExp({func, args}, nl)) = 	
 			let 
 				val (ts,t,lab,lev : tigertrans.level,ext) = case tabBusca(func, venv) of
@@ -91,8 +91,12 @@ fun transExp((venv, tenv, levNest) : ( venv * tenv * tigertrans.level)) : (tiger
 							| SOME (Var _) => error("No es funcion 2",nl)
 							| SOME (Func {level=lev,label=lab,formals=l,result=tip,extern=ext}) => (l,tip,lab,lev,ext)							
 				val _ = if (length ts <> length args) then error("Argumentos extras o faltantes",nl) else ()
-				val m = ListPair.zip (map (fn x => #ty (trexp x)) args, ts)
-				val argsExp = map (fn x => #exp (trexp x)) args : (tigertrans.exp list)			
+				val lExpTy = map trexp args
+				val lTy = map (fn x => #ty x) lExpTy
+				val argsExp = map (fn x => #exp x) lExpTy
+				(*val m = ListPair.zip (map (fn x => #ty (trexp x)) args, ts)*)
+				val m = ListPair.zip (lTy,ts)
+(*				val argsExp = map (fn x => #exp (trexp x)) args : (tigertrans.exp list)			*)
 			in
 				case t of
 					TUnit => if eqList m then {exp=callExp(lab,ext,true,lev,argsExp), ty= t} else error("Tipos erroneos",nl)
@@ -206,7 +210,8 @@ fun transExp((venv, tenv, levNest) : ( venv * tenv * tigertrans.level)) : (tiger
 			in if tiposIguales texp r then {exp=assignExp{var =evar ,exp = eexp},ty = TUnit} else error("Tipos erroneos",nl) end
 			
 		| trexp(IfExp({test, then', else'=SOME else'}, nl)) =
-			let val {exp=testexp, ty=tytest} = trexp test
+			let
+			    val {exp=testexp, ty=tytest} = trexp test
 			    val {exp=thenexp, ty=tythen} = trexp then'
 			    val {exp=elseexp, ty=tyelse} = trexp else'
 			in

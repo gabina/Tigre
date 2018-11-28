@@ -67,12 +67,7 @@ fun main(args) =
 		(* Funcion identidad *)
 		
 		fun id x = x
-		
-		(* funcion auxiliar para debuguear *)
-		
-		fun printNameProc [] = print ("\n")
-			| printNameProc ((b,f)::xs) = (print("nombre proc: "^tigerframe.name f^" cantidad de instrucciones: "^Int.toString(List.length(b))^"\n");printNameProc xs)
-		
+				
 		(*funcion auxiliar para debuguear, imprime los label existentes en el entorno del programa *)
 		
 		fun printLabels [] = print("\n")
@@ -80,7 +75,7 @@ fun main(args) =
 		
 		(* Escribe el codigo assembler de los strings para el programa *)
 		fun concatInstr [] = "\n"
-			| concatInstr (x::xs) = "\t"^x^concatInstr(xs)	
+			| concatInstr (x::xs) = "\t"^x^"\n"^concatInstr(xs)	
 		
 		fun asmStrings [] = ""
 			| asmStrings ((lab,s)::xs) =  let
@@ -110,7 +105,6 @@ fun main(args) =
 		
 		val _ = if precolored then (let
 									val _ = printLabels c
-									val _ = printNameProc b
 									val l11 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)
 									(*
 									val _ = print ("la longitud de la lista exterior es: "^Int.toString(List.length(l11))^"\n")
@@ -124,33 +118,37 @@ fun main(args) =
 		                          
 		val _ = if colored then (let 
 								val _ = printLabels c
-								val _ = printNameProc b
 								val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)		
 								val l2 = List.concat (map (fn (f,lin) => tigersimpleregalloc.simpleregalloc f lin) l1)
 							   in map (fn (i) => print((tigerassem.format id i) ^ "\n")) l2 end) else [()]
 		
 		(* funcion auxiliar, escribe el codigo COLOREADO como string, usado para escribir el archivo *)
-		
+		(*
 		fun asmFunction () = let
 							  val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)		
 							  val l2 = List.concat (map (fn (f,lin) => tigersimpleregalloc.simpleregalloc f lin) l1)
 						      val l3 = map (fn (i) => (tigerassem.format id i) ^ "\n") l2
 						     in concatInstr l3 end
 						      
-		
-		
-				
+		*)
+		fun asmFunction [] = "\n"
+		    | asmFunction ((body, f):: xs) = let
+							  val nFrame = tigerframe.name f
+							  val prol = ".globl "^nFrame^"\n.type "^nFrame^",@function\n"^nFrame^":\n\tpushq %rbp\n\tmovq %rsp, %rbp\n\tsubq $1024, %rsp\n\n"
+							  val epi = "\n\tmovq %rbp, %rsp\n\tpopq %rbp\n\tret\n"
+							  val l1 = List.concat(map (fn s => tigermunch.codeGen f s) body)
+							  val l2 = (tigersimpleregalloc.simpleregalloc f l1) : tigerassem.instr list
+	   					          val l3 = map (fn i => tigerassem.format id i) l2
+						     in prol^"\n"^concatInstr l3^"\n"^epi^(asmFunction xs) end
+								
 		(* opcion del debug -asm / escribe un archivo llamado prueba.s con el codigo assembler del programa *)
 		val _ = if asm then (let
-							val _ = printNameProc b
 							val _ = printLabels c
 							val outfile = open_out "../tests/TestAssm/prueba.s"
 							val _ = output(outfile, ".section\t.rodata\n\n")
 							val _ = output(outfile, asmStrings c)
-							val _ = output(outfile, ".section\t.text.startup,\"ax\",@progbits\n\n")
-							val _ = output(outfile, ".globl _tigermain\n.type _tigermain,@function\n_tigermain:\n\tpushq %rbp\n\tmovq %rsp, %rbp\n\tsubq $1024, %rsp\n\n")
-							val _ = output(outfile, asmFunction ())
-							val _ = output(outfile, "\n\tmovq %rbp, %rsp\n\tpopq %rbp\n\tret")
+							val _ = output(outfile, ".section\t.text.startup,\"ax\",@progbits\n\n")							
+							val _ = output(outfile, asmFunction b)							
 							val _ = close_out outfile
 						  in () end) else ()			   
 		
