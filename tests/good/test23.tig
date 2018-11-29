@@ -1,8 +1,8 @@
 let
   function fact (n : int) : int =
     if  n = 0
-      then 1
-      else n * fact (n - 1)
+        then 1
+        else n * fact (n - 1)
 in
-  if (fact (10) = 3628800) then print("Reinas de la noche") else print("Burras");0
+  if fact (10) = 11 then print("Reinas de la noche") else print("Burras");0
 end

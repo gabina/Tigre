@@ -1,55 +1,21 @@
 .section	.rodata
 
 .align 16
-.type L3, @object
-.size L3, 16
-L3:
+.type L5, @object
+.size L5, 16
+L5:
 	.quad 2
 	.ascii "OK"
 
 .align 16
-.type L4, @object
-.size L4, 16
-L4:
+.type L6, @object
+.size L6, 16
+L6:
 	.quad 4
-	.ascii "NOOK"
+	.ascii "nook"
 
 .section	.text.startup,"ax",@progbits
 
-.globl L0
-.type L0,@function
-L0:
-	pushq %rbp
-	movq %rsp, %rbp
-	subq $1024, %rsp
-
-
-	L11:
-
-	movq %rbp,  -16(%rbp)
-	movq $0, %r8
-
-	movq %r8,  -24(%rbp)
-	movq  -24(%rbp), %r9
-	movq  -16(%rbp), %r8
-	addq %r9, %r8
-
-	movq %r8,  -16(%rbp)
-	movq  -16(%rbp), %r8
-	movq %rdi, (%r8)
-
-	movq %rsi,  -8(%rbp)
-	movq  -8(%rbp), %rax
-	jmp L10
-
-	L10:
-
-
-
-
-	movq %rbp, %rsp
-	popq %rbp
-	ret
 .globl _tigermain
 .type _tigermain,@function
 _tigermain:
@@ -58,78 +24,90 @@ _tigermain:
 	subq $1024, %rsp
 
 
-	L9:
+	L11:
 
-	movq %rbp,  -24(%rbp)
 	movq $0, %r8
 
-	movq %r8,  -32(%rbp)
-	movq  -32(%rbp), %r9
-	movq  -24(%rbp), %r8
-	addq %r9, %r8
-
-	movq %r8,  -24(%rbp)
-	movq  -24(%rbp), %r8
-	movq %rdi, (%r8)
-
-	movq $15, %r8
-
 	movq %r8,  -8(%rbp)
-	movq %rbp, %rdi
-
-	movq $2, %rsi
-
-	movq $3, %rdx
-
-	movq $4, %rcx
-
-	movq $5, %r8
-
-	movq $6, %r9
-
-	pushq $7
-
-	pushq $8
-
-	pushq $9
-
-	pushq $10
-
-	call L0
-
-	movq %rax, %r8
+	movq $0, %r8
 
 	movq %r8,  -16(%rbp)
 	movq $2, %r8
 
-	movq %r8,  -40(%rbp)
+	movq %r8,  -24(%rbp)
 	movq  -16(%rbp), %r8
-	movq  -40(%rbp), %r9
+	movq  -24(%rbp), %r9
 	cmpq %r8, %r9
 
-	je L5
+	jle L1
 
-	L6:
+	L0:
 
-	movq $L4, %rdi
+	movq $3, %r8
+
+	movq %r8,  -32(%rbp)
+	movq  -8(%rbp), %r8
+	movq  -32(%rbp), %r9
+	cmpq %r8, %r9
+
+	je L7
+
+	L8:
+
+	movq $L6, %rdi
 
 	call print
+
+	L9:
+
+	movq  -8(%rbp), %rax
+	jmp L10
+
+	L1:
+
+	movq  -8(%rbp), %rax
+	movq %rax,  -40(%rbp)
+	movq $1, %r8
+
+	movq %r8,  -48(%rbp)
+	movq  -48(%rbp), %r9
+	movq  -40(%rbp), %r8
+	addq %r9, %r8
+
+	movq %r8,  -40(%rbp)
+	movq  -40(%rbp), %rax
+	movq %rax,  -8(%rbp)
+	movq  -16(%rbp), %r8
+	movq  -24(%rbp), %r9
+	cmpq %r8, %r9
+
+	je L0
+
+	L2:
+
+	movq  -16(%rbp), %rax
+	movq %rax,  -56(%rbp)
+	movq $1, %r8
+
+	movq %r8,  -64(%rbp)
+	movq  -64(%rbp), %r9
+	movq  -56(%rbp), %r8
+	addq %r9, %r8
+
+	movq %r8,  -56(%rbp)
+	movq  -56(%rbp), %rax
+	movq %rax,  -16(%rbp)
+	jmp L1
 
 	L7:
 
-	movq $0, %rax
-
-	jmp L8
-
-	L5:
-
-	movq $L3, %rdi
+	movq $L5, %rdi
 
 	call print
 
-	jmp L7
+	jmp L9
 
-	L8:
+	L10:
 
 
 

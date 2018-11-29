@@ -133,7 +133,7 @@ fun seq [] = EXP (CONST 0)
 	| seq (x::xs) = SEQ (x, seq xs)
 
 fun procEntryExit1 (f : frame,body) =  let
-					    
+					   val isMain = if (#name f) = "_tigermain" then true else false
 					    fun zipear [] _ = []
 					    | zipear (x::xs) n = [(x,n)] @ zipear xs (n+1)
 						
@@ -152,5 +152,5 @@ fun procEntryExit1 (f : frame,body) =  let
 						val _ = print ("LLL"^Int.toString (length lacc) ^"\n")
 						val listMoves =map accToMove lacc
 
-				   in  SEQ (seq listMoves,body) end
+				   in  if isMain then body else SEQ (seq listMoves,body) end
 end

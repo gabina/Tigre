@@ -3,7 +3,7 @@
 let
 	var a := 0
 in 
-	for i :=0 to 100 do (a :=a+1; ()); if a = 100 then print("OK") else print ("nook");a
+	for i :=0 to 2 do (a :=a+1; ()); if a = 3 then print("OK") else print ("nook");a
 end
 
 
