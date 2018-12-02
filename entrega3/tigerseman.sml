@@ -391,8 +391,7 @@ datatype EnvEntry =
 					val form = aux0 (p, n)
 					val lab = if nom = "_tigermain" then "_tigermain" else tigertrans.generateUniqueLab()
 					val nlevel = tigertrans.newLevel {parent = levNest, name = lab,nameViejo=nom,formals = f}					
-					val _ = print ("Agregando.. "^nom^" como "^lab^"\n")
-					(* PREGUNTA: ¿por qué inserto la función con nom en lugar de hacerlo con lab que es único? *)
+					(*val _ = print ("Agregando.. "^nom^" como "^lab^"\n")*)					
 		    	  in insertFuns(rns, fs, tabRInserta (nom, Func {level = nlevel, label = lab, formals = form, result = res, extern = false}, venv))
 		    	  end
 		    	                                                 

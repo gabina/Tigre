@@ -399,7 +399,7 @@ fun binOpStrExp {left, oper, right} =
 			| MinusOp 	=> raise Fail "no deberia llegar"
 			| TimesOp 	=> raise Fail "no deberia llegar"
 			| DivideOp 	=> raise Fail "no deberia llegar"				
-			| _		=> Cx (fn (t,f) => CJUMP(etiq,externalCall("_stringcmp", [l , r]),CONST 0,t,f))(*Ex (ESEQ(seq[MOVE(TEMP tmp, CONST 1),
+			| _		=> Cx (fn (t,f) => CJUMP(etiq,externalCall("_stringCompare", [l , r]),CONST 0,t,f))(*Ex (ESEQ(seq[MOVE(TEMP tmp, CONST 1),
 								CJUMP(etiq,,CONST 0,t,f),
 								LABEL f,
 								MOVE(TEMP tmp, CONST 0),
