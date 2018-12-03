@@ -8,7 +8,7 @@ echo -e "\nCOMPILO ASSEMBLER DEL TEST $1 \n"
 gcc -g ../tests/TestAssm/prueba.s ../tests/TestAssm/runtime.o
 ./a.out
 gedit ../tests/good/test$1.tig
-gedit ../tests/TestAssm/prueba.s
+geany ../tests/TestAssm/prueba.s
 
 
 

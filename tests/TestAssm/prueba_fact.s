@@ -26,24 +26,31 @@ L0:
 
 	L16:
 
-	movq %rbp,  -80(%rbp)
+	## %r8 = rbp + 0
+	movq %rbp,  -72(%rbp)
+	movq $0, %r8
+
+	movq %r8,  -80(%rbp)
+	movq  -80(%rbp), %r9
+	movq  -72(%rbp), %r8
+	addq %r9, %r8
+
+	
+	## poner el primer argumento (static link) en %rbp + 0
+	movq %r8,  -72(%rbp)
+	movq  -72(%rbp), %r8
+	movq %rdi, (%r8)
+
+	## en t0 =  -8(%rbp) está el argumento de fact
+	movq %rsi,  -8(%rbp)
+
+	## guarda el 0 de la comparación
 	movq $0, %r8
 
 	movq %r8,  -88(%rbp)
 	movq  -88(%rbp), %r9
-	movq  -80(%rbp), %r8
-	addq %r9, %r8
-
-	movq %r8,  -80(%rbp)
-	movq  -80(%rbp), %r8
-	movq %rdi, (%r8)
-
-	movq %rsi,  -8(%rbp)
-	movq $0, %r8
-
-	movq %r8,  -96(%rbp)
-	movq  -96(%rbp), %r9
 	movq  -8(%rbp), %r8
+	#compara el argumento con 0
 	cmpq %r9, %r8
 
 	je L3
@@ -51,54 +58,54 @@ L0:
 	L4:
 
 	movq  -8(%rbp), %rax
-	movq %rax,  -72(%rbp)
+	movq %rax,  -64(%rbp)
+	## %rbp en t1
 	movq %rbp,  -16(%rbp)
-	movq $0, %r8
 
+	movq $0, %r8
 	movq %r8,  -24(%rbp)
 	movq  -24(%rbp), %r9
 	movq  -16(%rbp), %r8
+	## r8 = %rbp + 0
 	addq %r9, %r8
-
+	
+	##pasa el static link (%rbp + 0) como primer argumento
 	movq %r8,  -16(%rbp)
 	movq  -16(%rbp), %r8
 	movq (%r8), %rdi
 
-	movq  -8(%rbp), %rax
-	movq %rax,  -32(%rbp)
-	
 	movq $1, %r8
-	movq %r8,  -40(%rbp)
 
+	movq %r8,  -32(%rbp)
 	movq  -32(%rbp), %r9
 	subq %r9, %r8
 
-	movq %r8,  -32(%rbp)
-	movq  -32(%rbp), %rsi
+	movq %r8,  -8(%rbp)
+	movq  -8(%rbp), %rsi
 	call L0
 
 	movq %rax, %r8
 
-	movq %r8,  -64(%rbp)
-	movq  -72(%rbp), %rax
-	movq %rax,  -48(%rbp)
-	movq  -64(%rbp), %r9
-	movq  -48(%rbp), %r8
+	movq %r8,  -56(%rbp)
+	movq  -64(%rbp), %rax
+	movq %rax,  -40(%rbp)
+	movq  -56(%rbp), %r9
+	movq  -40(%rbp), %r8
 	imul %r9, %r8
 
-	movq %r8,  -48(%rbp)
-	movq  -48(%rbp), %rax
-	movq %rax,  -56(%rbp)
+	movq %r8,  -40(%rbp)
+	movq  -40(%rbp), %rax
+	movq %rax,  -48(%rbp)
 	L5:
 
-	movq  -56(%rbp), %rax
+	movq  -48(%rbp), %rax
 	jmp L15
 
 	L3:
 
 	movq $1, %r8
 
-	movq %r8,  -56(%rbp)
+	movq %r8,  -48(%rbp)
 	jmp L5
 
 	L15:
@@ -109,6 +116,7 @@ L0:
 	movq %rbp, %rsp
 	popq %rbp
 	ret
+
 .globl _tigermain
 .type _tigermain,@function
 _tigermain:
@@ -121,7 +129,7 @@ _tigermain:
 
 	movq %rbp, %rdi
 
-	movq $50, %rsi
+	movq $1, %rsi
 
 	call L0
 

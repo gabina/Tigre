@@ -1,4 +1,4 @@
 
-(if(1<2) then print("V") else print("F");0)
+(if(1>2) then print("V") else print("F");0)
 
 
