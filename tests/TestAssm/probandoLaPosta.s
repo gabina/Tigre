@@ -19,9 +19,6 @@ L9:
 .globl L0
 .type L0,@function
 L0:
-	popq %rcx
-	pushq %rcx
-	
 	pushq %rbp
 	movq %rsp, %rbp
 	subq $1024, %rsp
@@ -38,8 +35,6 @@ L0:
 
 	movq %rbp, %rsp
 	popq %rbp
-	popq %rcx
-	pushq %rcx	
 	ret
 .globl _tigermain
 .type _tigermain,@function

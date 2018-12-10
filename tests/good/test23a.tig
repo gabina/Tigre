@@ -4,5 +4,5 @@ let
         then 1
         else fact (n - 1)
 in
-  if fact (2) = 1 then print("Reinas de la noche") else print("Burras");0
+  if fact (3) = 6 then print("Reinas de la noche") else print("Burras");0
 end

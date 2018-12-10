@@ -114,8 +114,14 @@ let
 
 			| BINOP(PLUS,TEMP t,e1) 	=> result (fn r => (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t,dst=r});
 								            emit (OPER {assem="addq %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
+(*
 			| BINOP(MUL,TEMP t,e1) 		=> result (fn r => (emit (tigerassem.MOVE {assem = "movq %'s0, %'d0\n",src=t,dst=r});
 								            emit (OPER {assem="imul %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))
+	*)										            
+			
+			| BINOP(MUL,e1, TEMP t) 	=> result (fn r => (emit (OPER{assem = "movq %'s0, %'d0\n",src=[munchExp e1],dst=[r],jump=NONE});
+										    emit (OPER{assem="imul %'s0, %'d0\n",src=[t,r],dst=[r],jump=NONE})))  
+										    
 			| BINOP(MINUS,TEMP t,e1) 	=> result (fn r => (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t,dst=r});
 								            emit (OPER {assem="subq %'s0, %'d0\n",src=[munchExp e1,r],dst=[r],jump=NONE})))		
 			| BINOP (PLUS,e,CONST i) 	=> result (fn r => (emit (OPER {assem="movq %'s0, %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
@@ -126,8 +132,8 @@ let
 			| BINOP (MUL,e,CONST i) 	=> result (fn r => (emit (OPER {assem="movq %'s0, %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
 						   				    emit (OPER {assem="imul $"^its(i)^", %'d0\n",src=[r],dst=[r],jump=NONE})))
 
-			| BINOP (PLUS,CONST i,e) 	=> result (fn r => (emit (OPER {assem="movq $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE});
-									    emit (OPER {assem="addq %'s0, %'d0\n",src=[munchExp e,r],dst=[r],jump=NONE})))
+			| BINOP (PLUS,CONST i,e) 	=> result (fn r => (emit (OPER {assem="movq11 $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE});
+									    emit (OPER {assem="addq11 %'s0, %'d0\n",src=[munchExp e,r],dst=[r],jump=NONE})))
 
 			| BINOP (MINUS,CONST i,e) 	=> result (fn r => (emit (OPER {assem="movq $"^its(i)^", %'d0\n",src=[],dst=[r],jump=NONE});
 										    emit (OPER {assem="subq %'s0, %'d0\n",src=[munchExp e,r],dst=[r],jump=NONE})))
@@ -140,9 +146,7 @@ let
 
 			| BINOP(MINUS,e1, TEMP t) 	=> result (fn r => (emit (OPER{assem = "movq %'s0, %'d0\n",src=[munchExp e1],dst=[r],jump=NONE});
 										    emit (OPER{assem="subq %'s0, %'d0\n",src=[t,r],dst=[r],jump=NONE})))
-
-			| BINOP(MUL,e1, TEMP t) 	=> result (fn r => (emit (OPER{assem = "movq %'s0, %'d0\n",src=[munchExp e1],dst=[r],jump=NONE});
-										    emit (OPER{assem="imul %'s0, %'d0\n",src=[t,r],dst=[r],jump=NONE})))  												
+												
 			| BINOP(PLUS,MEM e,CONST i) 	=> result (fn r => (emit (OPER {assem ="movq (%'s0), %'d0\n",src=[munchExp e],dst=[r],jump=NONE});
 									    emit (OPER {assem="addq $"^its(i)^", %'d0\n",src=[r],dst=[r],jump=NONE})))
 			| BINOP(MINUS,MEM e,CONST i) 	=> result (fn r => (emit (OPER {assem ="movq (%'s0), %'d0\n",src=[munchExp e],dst=[r],jump=NONE});

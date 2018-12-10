@@ -26,76 +26,79 @@ L0:
 
 	L16:
 
-	movq2 %rbp,  -56(%rbp)
+	movq %rbp,  -72(%rbp)
 	movq $0, %r8
 
-	movq2 %r8,  -64(%rbp)
-	movq1  -64(%rbp), %r9
-	movq1  -56(%rbp), %r8
+	movq %r8,  -80(%rbp)
+	movq  -80(%rbp), %r9
+	movq  -72(%rbp), %r8
 	addq %r9, %r8
 
-	movq2 %r8,  -56(%rbp)
-	movq1  -56(%rbp), %r8
+	movq %r8,  -72(%rbp)
+	movq  -72(%rbp), %r8
 	movq %rdi, (%r8)
 
-	movq2 %rsi,  -8(%rbp)
+	movq %rsi,  -8(%rbp)
 	movq $0, %r8
 
-	movq2 %r8,  -72(%rbp)
-	movq1  -72(%rbp), %r9
-	movq1  -8(%rbp), %r8
+	movq %r8,  -88(%rbp)
+	movq  -88(%rbp), %r9
+	movq  -8(%rbp), %r8
 	cmpq %r9, %r8
 
 	je L3
 
 	L4:
 
-	movq2 %rbp,  -80(%rbp)
+	movq  -8(%rbp), %rax
+	movq %rax,  -64(%rbp)
+	movq %rbp,  -16(%rbp)
 	movq $0, %r8
 
-	movq2 %r8,  -16(%rbp)
-	movq1  -16(%rbp), %r8
-	movq1  -80(%rbp), %r9
-	addq %r8, %r9
+	movq %r8,  -24(%rbp)
+	movq  -24(%rbp), %r9
+	movq  -16(%rbp), %r8
+	addq %r9, %r8
 
-	movq2 %r9,  -80(%rbp)
-	movq1  -80(%rbp), %r8
+	movq %r8,  -16(%rbp)
+	movq  -16(%rbp), %r8
 	movq (%r8), %rdi
 
-	movq1  -8(%rbp), %r8
+	movq  -8(%rbp), %r8
 	movq %r8, %rsi
 
 	movq $1, %r8
 
-	movq2 %r8,  -24(%rbp)
-	movq1  -24(%rbp), %r8
+	movq %r8,  -32(%rbp)
+	movq  -32(%rbp), %r8
 	subq %r8, %rsi
 
 	call L0
 
 	movq %rax, %r8
 
-	movq2 %r8,  -48(%rbp)
-	movq11 $3, %r8
+	movq %r8,  -56(%rbp)
+	movq  -8(%rbp), %r9
+	movq %r9, %r8
 
-	movq2 %r8,  -32(%rbp)
-	movq1  -48(%rbp), %r9
-	movq1  -32(%rbp), %r8
-	addq11 %r9, %r8
+	movq %r8,  -40(%rbp)
+	movq  -56(%rbp), %r9
+	movq  -40(%rbp), %r8
+	imul %r9, %r8
 
-	movq2 %r8,  -32(%rbp)
-	movq1  -32(%rbp), %rax
-	movq2 %rax,  -40(%rbp)
+	movq %r8,  -40(%rbp)
+	movq  -40(%rbp), %rax
+	movq %rax,  -48(%rbp)
 	L5:
 
-	movq1  -40(%rbp), %rax
+	movq  -48(%rbp), %rax
 	jmp L15
 
 	L3:
 
 	movq $1, %r8
 
-	movq2 %r8,  -40(%rbp)
+	movq %r8,  -48(%rbp)
 	jmp L5
 
 	L15:
@@ -124,12 +127,12 @@ _tigermain:
 
 	movq %rax, %r8
 
-	movq2 %r8,  -16(%rbp)
+	movq %r8,  -16(%rbp)
 	movq $2, %r8
 
-	movq2 %r8,  -8(%rbp)
-	movq1  -8(%rbp), %r8
-	movq1  -16(%rbp), %r9
+	movq %r8,  -8(%rbp)
+	movq  -8(%rbp), %r8
+	movq  -16(%rbp), %r9
 	cmpq %r8, %r9
 
 	je L10
