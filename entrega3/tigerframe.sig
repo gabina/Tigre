@@ -15,7 +15,7 @@ val r9 : tigertemp.temp
 
 datatype access = InFrame of int | InReg of tigertemp.label
 val fpPrev : int
-val fpPrevLev : int
+val offStaticLink : int
 val newFrame : {name: tigertemp.label, nameViejo: tigertemp.label,formals: bool list} -> frame
 val name : frame -> tigertemp.label
 val nameViejo : frame -> tigertemp.label

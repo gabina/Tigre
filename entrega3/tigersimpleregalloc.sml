@@ -45,7 +45,7 @@ struct
 				| printTempOff ((t,n)::xs) = (print("Temporal: "^t^" Offset: "^Int.toString(n)^"\n"); printTempOff xs)
 		
 		val accesses = map (fn T => let val frame.InFrame n = frame.allocLocal frm true in (T, n) end) temps
-		(*val _ = (print("lista Inicial\n");printTempOff accesses)*)
+		val _ = (print("lista Inicial\n");printTempOff accesses)
 		fun getFramePos T =
 			let
 				fun gfp T [] = raise Fail("Temporario no encontrado: "^T)

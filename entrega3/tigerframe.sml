@@ -22,7 +22,7 @@ open tigertree
 (*type level = int*)
 
 val fp = "rbp"				(* frame pointer *)
-val sp = "sp"				(* stack pointer *)
+val sp = "rsp"				(* stack pointer *)
 val rv = "rax"				(* return value  *)
 val rdi ="rdi"
 val rsi = "rsi"
@@ -34,15 +34,16 @@ val ov = "ov"				(* overflow value (edx en el 386) *)
 val wSz = 8				(* word size in bytes *)
 val log2WSz = 3				(* base two logarithm of word size in bytes *)
 val fpPrev = 0				(* offset (bytes) *)
-val fpPrevLev = 8			(* offset (bytes) *)
+val offStaticLink = ~8			(* offset (bytes) *)
+val offArgs = 8 (* cuanto arriba del fp empiezan a estar los argumentos pasados por pila*)
 
-val argsInicial = 0			(* words *)
-val argsOffInicial = 0		(* words *)
+val argsInicial = 0			(* el primer argumento *)
+val argsOffInicial = ~8		(* words *)
 val argsGap = wSz			(* bytes *)
 
 val regInicial = 1			(* reg *)
-val localsInicial = 0		(* words *)
-val localsGap = ~8 			(* bytes *)
+val localsInicial = 0		(* la primera variable local *)
+val localsGap = 8 			(* bytes *)
 
 val calldefs = [rv]
 val specialregs = [rv, fp, sp]
@@ -73,8 +74,8 @@ fun newFrame{name, nameViejo,formals} = {
 	formals=formals,
 	arguments=ref [],
 	locals=[],
-	actualArg=ref argsInicial, (*Cantidad de veces que se llama a allocArg*)
-	actualLocal=ref localsInicial,
+	actualArg=ref argsInicial, (*Cantidad de argumentos guardados en la pila*)
+	actualLocal=ref localsInicial, (*Cantidad de variables locales guardadas en la pila*)
 	actualReg=ref regInicial
 }
 fun name (f: frame) = #name f
@@ -103,7 +104,8 @@ fun allocArg (f: frame) b =
 	let val acc = 
 		(case b of
 		true =>
-			let	val ret = (!(#actualArg f)+argsOffInicial+1)*wSz
+			let	val _ = print("hola \n")
+				val ret = (argsOffInicial-(!(#actualArg f)*wSz))
 				val _ = #actualArg f := !(#actualArg f)+1
 			in	InFrame ret end
 		| false => InReg(tigertemp.newtemp()))
@@ -113,14 +115,14 @@ fun allocArg (f: frame) b =
 fun allocLocal (f: frame) b = 
 	case b of
 	true =>
-		let	val ret = InFrame ((!(#actualLocal f)+localsInicial+1)*localsGap) (* REVISAR MULTIPLICAR *)
+		let	val ret = InFrame ((~(!(#actualLocal f))-(!(#actualArg f)))*localsGap+argsOffInicial) (* REVISAR MULTIPLICAR *)
 		in	#actualLocal f:=(!(#actualLocal f)+1); ret end
 	| false => InReg(tigertemp.newtemp())
 
 (* Habría que verificar que esto ande correctamente *)
 (* Para acceder a variables. ¿Siempre que accedo a variable serán hijas? *)	
 fun getFrame 0 = TEMP(fp)
-	| getFrame n = MEM(BINOP(PLUS, (getFrame (n-1)), CONST fpPrev))
+	| getFrame n = MEM(BINOP(PLUS, (getFrame (n-1)), CONST offStaticLink))
 
 fun exp (InFrame k) e = MEM(BINOP(PLUS, getFrame e, CONST k))
 (*  | exp (InReg l) e = (print("Entro en temp "^l^"\n\n");TEMP l) *)
@@ -134,6 +136,7 @@ fun seq [] = EXP (CONST 0)
 
 fun procEntryExit1 (f : frame,body) =  let
 					   val isMain = if (#name f) = "_tigermain" then true else false
+					   val _ = print (#name f)
 					    fun zipear [] _ = []
 					    | zipear (x::xs) n = [(x,n)] @ zipear xs (n+1)
 						
@@ -147,8 +150,8 @@ fun procEntryExit1 (f : frame,body) =  let
 						| natToReg 5 = r9
 						| natToReg _ = raise Fail "No deberia pasar (natToReg)"				
 						
-						fun accToMove ((InReg t),n) = if n<6 then MOVE (TEMP t,TEMP (natToReg n)) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST ((n-6)*localsGap))))(*else MOVE(t,(*push*))*)
-						    | accToMove ((InFrame k),n) = if n<6 then MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n)) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST ((n-6)*localsGap))))                                        						
+						fun accToMove ((InReg t),n) = if n<6 then (print("inreg <6\n");MOVE (TEMP t,TEMP (natToReg n))) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))
+						    | accToMove ((InFrame k),n) = if n<6 then (print("inframe <6\n");MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n))) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))                                        						
 						val listMoves =map accToMove lacc
 
 				   in  if isMain then body else SEQ (seq listMoves,body) end

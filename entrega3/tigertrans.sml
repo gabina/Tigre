@@ -219,8 +219,8 @@ fun callExp(name,ext,isproc,lev : level, ls : exp list) =
 let	
 	val dif = getActualLev() - levInt (lev)	
 	
-	fun calcSL 0 = MEM (BINOP (PLUS, TEMP fp, CONST (tigerframe.fpPrev)))
-		| calcSL n = MEM (BINOP (PLUS, calcSL (n-1), CONST (tigerframe.fpPrev)))
+	fun calcSL 0 = MEM (BINOP (PLUS, TEMP fp, CONST (tigerframe.offStaticLink)))
+		| calcSL n = MEM (BINOP (PLUS, calcSL (n-1), CONST (tigerframe.offStaticLink)))
 
 	val sl = if (dif = (~1)) then (TEMP fp) else (calcSL dif)	
 

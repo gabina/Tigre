@@ -416,7 +416,9 @@ datatype EnvEntry =
 					let
 						val tipos = aux0(p, n)
 						val auxiliar = ListPair.zip (p, tipos)
-						val auxiliar2 = ListPair.zip (auxiliar, listPos)
+						val auxiliar2 = ListPair.zip (auxiliar, listPos) (*ARREGLAR la primera vez hay que agregar (hd listPos)
+																																				la segunda vez hay que agregar (snd listPos)
+																																				...*)
 						val auxiliar3 = List.map (fn ((a,b),c) => (a,b,c)) auxiliar2
 						val nvenv = insertArgs (auxiliar3, nom, venv)
 					in 
