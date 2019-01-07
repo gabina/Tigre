@@ -1,5 +1,5 @@
 *.uo
 *.ui
-entrega2/tiger
+*/tiger
 *.txt
-entrega2/Makefile
+*/Makefile
