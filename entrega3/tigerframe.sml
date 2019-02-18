@@ -1,18 +1,18 @@
 (*
-	Frames para el 80386 (sin displays ni registers).
+	Layout del frame real. Los primeros 6 argumentos son pasados por registros
 
-		|    argn    |	fp+4*(n+1)
+		|    argn    |	
 		|    ...     |
-		|    arg2    |	fp+16
-		|    arg1    |	fp+12
-		|	fp level |  fp+8
-		|  retorno   |	fp+4
-		|   fp ant   |	fp
+		|    arg8    |	fp+24
+		|    arg7    |	fp+16
+		|  retorno   |	fp+8
+		|   rbp ant  |	fp
 		--------------	fp
-		|   local1   |	fp-4
-		|   local2   |	fp-8
-		|    ...     |
-		|   localn   |	fp-4*n
+		| static link|	fp-8
+		|    arg7    |	fp-16
+		|    arg8    |  fp-24
+		|    ...     |	
+		|   local1   |
 *)
 
 structure tigerframe :> tigerframe = struct
@@ -30,15 +30,14 @@ val rdx = "rdx"
 val rcx = "rcx"
 val r8 = "r8"
 val r9 = "r9"
-val ov = "ov"				(* overflow value (edx en el 386) *)
 val wSz = 8				(* word size in bytes *)
 val log2WSz = 3				(* base two logarithm of word size in bytes *)
 val fpPrev = 0				(* offset (bytes) *)
 val offStaticLink = ~8			(* offset (bytes) *)
-val offArgs = 8 (* cuanto arriba del fp empiezan a estar los argumentos pasados por pila*)
+val offArgs = 16 (* cuanto arriba del fp empiezan a estar los argumentos pasados por pila*)
 
 val argsInicial = 0			(* el primer argumento *)
-val argsOffInicial = ~8		(* words *)
+val argsOffInicial = ~16		(* words *)
 val argsGap = wSz			(* bytes *)
 
 val regInicial = 1			(* reg *)
@@ -48,8 +47,13 @@ val localsGap = 8 			(* bytes *)
 val calldefs = [rv]
 val specialregs = [rv, fp, sp]
 val argregs = []
-val callersaves = []
-val calleesaves = []
+val callersaves = [rv,rcx,rdx,rsi,rdi,r8,r9,"r10", "r11"]	
+val calleesaves = ["rbx", fp, sp, "r12", "r13", "r14", "r15"]
+val calleesaves' = ["rbx", "r12", "r13", "r14", "r15"]
+val registers = [rv,"rbx",rcx,rdx,rsi,rdi,fp,sp,r8,r9,"r10","r11","r12","r13","r14","r15"]
+val K = length registers
+
+fun its n =  if n<0 then "-" ^ Int.toString(~n) else Int.toString(n) 
 
 datatype access = InFrame of int | InReg of tigertemp.label
 
@@ -87,16 +91,8 @@ fun string(l, s) = l^tigertemp.makeString(s)^"\n"
 fun getFormals(f: frame) = #formals f
 fun getLocals(f: frame) = #locals f
 
-(* Función original*)
-(*fun formals({formals=f, ...}: frame) = 
-	let	fun aux(n, []) = []
-		| aux(n, h::t) = InFrame(n)::aux(n+argsGap, t)
-		(*| aux(n, false::t) = InReg(tigertemp.newtemp())::aux(n, t)*)
-	in aux(argsInicial, f) end
-*)
-
 (* El InFrame que se agrega al inicio corresponde al static link*)
-fun formals({arguments=ar, ...}: frame) = [InFrame (argsOffInicial)] @ !ar 
+fun formals({arguments=ar, ...}: frame) = [InFrame (offStaticLink)] @ !ar 
 
 fun maxRegFrame(f: frame) = !(#actualReg f)
 
@@ -104,11 +100,11 @@ fun allocArg (f: frame) b =
 	let val acc = 
 		(case b of
 		true =>
-			let	val _ = print("hola \n")
+			let	val _ = print("allocARg InFrame \n")
 				val ret = (argsOffInicial-(!(#actualArg f)*wSz))
 				val _ = #actualArg f := !(#actualArg f)+1
 			in	InFrame ret end
-		| false => InReg(tigertemp.newtemp()))
+		| false => (print("allorArg InReg \n");InReg(tigertemp.newtemp())))
 	in (#arguments f := !(#arguments f) @ [acc];acc) end
 	(* malloc *)
 
@@ -116,6 +112,7 @@ fun allocLocal (f: frame) b =
 	case b of
 	true =>
 		let	val ret = InFrame ((~(!(#actualLocal f))-(!(#actualArg f)))*localsGap+argsOffInicial) (* REVISAR MULTIPLICAR *)
+			val _ = print "allocLocal true"
 		in	#actualLocal f:=(!(#actualLocal f)+1); ret end
 	| false => InReg(tigertemp.newtemp())
 
@@ -128,15 +125,16 @@ fun exp (InFrame k) e = MEM(BINOP(PLUS, getFrame e, CONST k))
 (*  | exp (InReg l) e = (print("Entro en temp "^l^"\n\n");TEMP l) *)
 	| exp (InReg l) e = (TEMP l)	
 
+
 fun externalCall(s, l) = CALL(NAME s, l)
 
 fun seq [] = EXP (CONST 0)
 	| seq [s] = s
 	| seq (x::xs) = SEQ (x, seq xs)
 
-fun procEntryExit1 (f : frame,body) =  let
-					   val isMain = if (#name f) = "_tigermain" then true else false
-					   val _ = print (#name f)
+fun procEntryExit1 (f : frame,body) =  
+					let
+					    val isMain = (#name f) = "_tigermain"
 					    fun zipear [] _ = []
 					    | zipear (x::xs) n = [(x,n)] @ zipear xs (n+1)
 						
@@ -150,9 +148,10 @@ fun procEntryExit1 (f : frame,body) =  let
 						| natToReg 5 = r9
 						| natToReg _ = raise Fail "No deberia pasar (natToReg)"				
 						
-						fun accToMove ((InReg t),n) = if n<6 then (print("inreg <6\n");MOVE (TEMP t,TEMP (natToReg n))) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))
-						    | accToMove ((InFrame k),n) = if n<6 then (print("inframe <6\n");MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n))) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))                                        						
-						val listMoves =map accToMove lacc
-
-				   in  if isMain then body else SEQ (seq listMoves,body) end
+						fun accToMove ((InReg t),n) = if n<6 then (print("inreg <6\n");MOVE (TEMP t,TEMP (natToReg n))) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap)))) (*A partir del fp hay que sumar porque estamos queriendo acceder a la pila del llamante*)
+						  | accToMove ((InFrame k),n) = if n<6 then (print("inframe <6  "^its(k)^"\n");MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n))) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))                                         						
+				   in  if isMain then body else SEQ (seq (map accToMove lacc),body) end
+				   
+			   
 end
+

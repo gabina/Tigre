@@ -28,7 +28,7 @@ val tab_vars : (string, EnvEntry) Tabla = tabInserList(
 		formals=[TString], result=TUnit, extern=true}),
 	("flush", Func{level=topLevel(), label="flush",
 		formals=[], result=TUnit, extern=true}),
-	("getchar", Func{level=topLevel(), label="getchar",
+	("getchar", Func{level=topLevel(), label="getstr",
 		formals=[], result=TString, extern=true}),
 	("ord", Func{level=topLevel(), label="ord",
 		formals=[TString], result=TInt, extern=true}),
@@ -315,19 +315,16 @@ and trvar(SimpleVar s, nl) =
 
 (*
 	ENTREGA 2:
-
 dec = FunctionDec of ({name: symbol, params: field list,
 		result: symbol option, body: exp} * pos) list
 	| VarDec of {name: symbol, escape: bool ref,
 		     typ: symbol option, init: exp} * pos
 	| TypeDec of ({name: symbol, ty: ty} * pos) list
-
 datatype EnvEntry =
 	VIntro of {access: tigertrans.access, level: int}	(* int readonly *)
 	| Var of {ty: Tipo, access: tigertrans.access, nivel: int}
 	| Func of {level: tigertrans.level, label: tigertemp.label,
 		formals: Tipo list, result: Tipo, extern: bool}
-
 	Cosas a tener en cuenta de EnvEntry Func: 
 	label es un string que debe ser único, para identificar funciones anidadas con el mismo nombre.
     result será el result de FunctionDec en caso de que esté presente, sino será TUnit (las funciones siempre deben indicar su tipo)
@@ -411,21 +408,20 @@ datatype EnvEntry =
 				 end
   			     (*(#level (levNest : tigertrans.level)) : int}*)
 			   (* Genera una lista de entornos donde se agregaron los argumentos de las funciones *)
-			   fun newEnvs (([], venv) : ((recfun * int) list * venv)) : venv list = []
-			     | newEnvs (({name = nom, params = p, ...}, n) :: rns, venv) =  
+			   fun newEnvs (([], venv,_) : ((recfun * int) list * venv * int list)) : venv list = []
+			     | newEnvs (({name = nom, params = p, ...}, n) :: rns, venv,intList) =  
 					let
 						val tipos = aux0(p, n)
 						val auxiliar = ListPair.zip (p, tipos)
-						val auxiliar2 = ListPair.zip (auxiliar, listPos) (*ARREGLAR la primera vez hay que agregar (hd listPos)
-																																				la segunda vez hay que agregar (snd listPos)
-																																				...*)
+						val pos = hd intList
+						val auxiliar2 = map (fn a => (a,pos)) auxiliar(*ListPair.zip (auxiliar, listPos)*) (*ARREGLADO *)
 						val auxiliar3 = List.map (fn ((a,b),c) => (a,b,c)) auxiliar2
 						val nvenv = insertArgs (auxiliar3, nom, venv)
 					in 
-						 nvenv :: (newEnvs (rns, venv))
+						 nvenv :: (newEnvs (rns, venv,tl intList))
 					end
 			   
-			   val venvs : venv list = newEnvs(xs, env1) (* venvs es la lista de entornos con las variables agregadas para cada función *)
+			   val venvs : venv list = newEnvs(xs, env1, listPos) (* venvs es la lista de entornos con las variables agregadas para cada función *)
 			   (* Corroboramos cada body con su respectivo env 
 			   Agregar las expresiones de los cuerpos a la lista global*)				   
 			fun aux4 ([] : (recfun * venv * int) list) : Tipo list = []

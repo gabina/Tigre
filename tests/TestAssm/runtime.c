@@ -137,7 +137,7 @@ long _stringCompare(string *s, string *t)
     if(s == t)
 		return 0;
 	printf("Longitud1 %ld longitud2 %ld \n",s->length,t->length);
-	printf("Caracter1 %u caracter2 %u \n",s->chars,t->chars);
+	printf("Caracter1 %c caracter2 %c \n",s->chars,t->chars);
     for(i = 0; i<s->length && i<t->length; i++)
 		if(s->chars[i]!=t->chars[i])
 		    return s->chars[i]-t->chars[i];
@@ -147,7 +147,7 @@ void print(string *s)
 {
     int i;
     unsigned char *p = s->chars;
-    printf("Longitud : %ld \n", s->length); 
+    //printf("Longitud : %ld \n", s->length); 
    for (i = 0; i < s->length; i++, p++)
 		putchar(*p);
 }

@@ -23,4 +23,11 @@ val tabPrimer : ('b -> bool) * ('a, 'b) Tabla -> ('a * 'b)
 val tabClaves : ('a, 'b) Tabla -> 'a list
 val tabIgual : ('a * 'a -> bool) *  ('b, 'a) Tabla *  ('b, 'a) Tabla -> bool
 
+val buscoEnTabla : ''a * (''a, 'b) Tabla -> 'b 
+val tabPrintIntInstr : (int, tigerassem.instr) Tabla -> unit
+val tabPrintIntTempSet : (int, tigertemp.temp Splayset.set) Tabla -> unit
+val tabPrintIntIntSet : (int, int Splayset.set) Tabla -> unit
+val tabPrintTempTempSet : (tigertemp.temp, tigertemp.temp Splayset.set) Tabla -> unit
+val tabPrintTempTemp : (tigertemp.temp, tigertemp.temp) Tabla -> unit
+val printInstrList : tigerassem.instr list -> unit
 end
