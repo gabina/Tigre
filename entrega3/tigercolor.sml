@@ -291,7 +291,7 @@ struct
 										
 	fun colorear'(l,f,initial) = 
 		let 
-			val _ = tigerbuild.build(l,0)		
+			val _ = tigerbuild.build(l,1)		
 		
 			val _ = spilledNodes := []
 			

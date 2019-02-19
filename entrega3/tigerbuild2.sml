@@ -1,4 +1,3 @@
-
 structure tigerbuild :> tigerbuild =
 struct
 	open tigerassem
@@ -113,7 +112,7 @@ struct
 																																			
 		fun forEachN (0,outNueva,outVieja,inNueva,inVieja) = (outNueva,outVieja,inNueva,inVieja)
 		| forEachN (n,outNueva,outVieja,inNueva,inVieja) = let
-															val nReal = n-1
+															val nReal = longNatToInstr - n
 															fun buscoEnTabla (x,t) = (case (tabBusca (x,t)) of 
 																						NONE => empty
 																						| SOME v => v)
@@ -131,16 +130,10 @@ struct
 															val defN = buscoEnTabla (nReal,!defs)									
 															val inVieja' = tabRInserta(nReal,union(useN,difference(outN,defN)),inVieja)
 															
-															(*
 															val succsN = listItems (buscoEnTablaInt (nReal,!succs))
-															fun index m = listItems (buscoEnTabla (m,inVieja'))		
+															fun index m = listItems (buscoEnTabla (m,inVieja'))
+															
 															val m = Splayset.addList(empty,List.concat (List.map index succsN))
-															*)
-															
-															val succsN = buscoEnTablaInt (nReal,!succs)
-															fun f (node, tempSet) = union(tempSet, buscoEnTabla (node,inVieja'))
-															val m = foldl f emptyStr succsN
-															
 															val outVieja' = tabRInserta (nReal,m,outVieja)
 														in
 															forEachN (n-1, outNueva',outVieja',inNueva',inVieja')
@@ -152,20 +145,18 @@ struct
 														in 
 															if fin then (outNueva',outVieja',inNueva',inVieja') else  repeatUntil(outNueva',outVieja',inNueva',inVieja')
 														end						
-		
-		fun listInit 0 = [0]
-		| listInit n = n :: (listInit (n-1))
-		
-		fun liveness (outNueva,outVieja,inNueva,inVieja) =  let
-																val list = listInit lastInstrNumber
-																val inVieja' = List.foldl (fn (n,tabla) => tabRInserta(n,empty,tabla)) inVieja list
-																val outVieja' = List.foldl (fn (n,tabla) => tabRInserta(n,empty,tabla)) outVieja list
-															in repeatUntil(outNueva,outVieja',inNueva,inVieja')
-															end
+														
+		fun liveness (0,(outNueva,outVieja,inNueva,inVieja)) = (outNueva,outVieja,inNueva,inVieja)
+			| liveness (n,(outNueva,outVieja,inNueva,inVieja)) = let
+																	val nReal = longNatToInstr - n
+																	val inVieja' = tabRInserta(nReal,empty,inVieja)
+																	val outVieja' = tabRInserta(nReal,empty,outVieja)
+																in liveness(n-1,repeatUntil(outNueva,outVieja',inNueva,inVieja'))
+																end
 														
 		fun referenciar (a,b,c,d) =(ref a, ref b, ref c, ref d)
 		
-		val (liveOut, liveOutOld, liveIn, liveInOld) = referenciar (liveness(tabNueva(),tabNueva(),tabNueva(),tabNueva()))
+		val (liveOut, liveOutOld, liveIn, liveInOld) = referenciar (liveness(longNatToInstr,(tabNueva(),tabNueva(),tabNueva(),tabNueva())))
 		
 		val _ = if (pFlag = 1) then (print ("\nImprimo liveIn\n");tigertab.tabPrintIntTempSet(!liveIn)) else ()		
 		val _ = if (pFlag = 1) then (print ("\nImprimo liveOut\n");tigertab.tabPrintIntTempSet(!liveOut)) else ()
@@ -273,8 +264,9 @@ struct
 																						
 																						(* Instrucciones con las que ya están relacionados la fuente y el destino*)
 																						val dSet = findSet(d,tabMoves)					
-																						val sSet = findSet (s,tabMoves)																							
+																						val sSet = findSet (s,tabMoves)																			val _ = print ("hola "^s^"\n")				
 																						val sMoves' = if member(buscoEnTabla(s,!interf),d) then sMoves else union(sMoves, nSet)
+																						val _  = print ("chau\n")
 																						
 																						val tabMoves' = tabRInserta(d,union(dSet,nSet),tabRInserta(s,union(sSet,nSet),tabMoves))
 																						
