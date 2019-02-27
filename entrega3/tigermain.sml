@@ -123,7 +123,7 @@ fun main(args) =
 							  (*val epi = "\n\tmovq %rbp, %rsp\n\tpopq %rbp\n\tret\n"*)
 							  val l1 = List.concat(map (fn s => tigermunch.codeGen f s) body)	
 							  val l2 = tigermunch.procEntryExit2(f,l1) (* agregar prologo y epilogo *)					  
-							  val (pintar, l3) = tigercolor.colorear(l2,f,1)
+							  val (pintar, l3) = tigercolor.colorear(l2,f,0)
 							  val l4 = map (fn i => tigerassem.format pintar i) l3
 								  (*
 							  val l1 = (List.map apCode b) : ((tigerframe.frame * tigerassem.instr list) list)									

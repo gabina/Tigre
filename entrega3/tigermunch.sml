@@ -55,9 +55,9 @@ let
 												        emit (OPER {assem="movq %'s0, (%'s1)\n",src=[t,munchExp e1],dst=[],jump=NONE}))
 												   end
 			| MOVE (TEMP t, CALL(NAME e,args)) 	=> (munchArgs (0,sortArgs args); emit (OPER {assem="call "^e^"\n",src=[sp],dst=callersaves,jump=NONE}); 
-																		emit (OPER {assem="movq %rax, %'d0\n",src=[],dst=[t],jump=NONE}))							   
+																		emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=rv,dst=t}))							   
 			| MOVE (MEM(e1),e2) 				=> emit (OPER {assem="movq %'s0, (%'s1)\n",src=[munchExp e2,munchExp e1],dst=[],jump=NONE})
-			| MOVE (TEMP i,e2) 					=> emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=i})
+			| MOVE (TEMP t,e2) 					=> emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=t})
 			| JUMP (NAME n,l) 					=> emit (OPER {assem="jmp "^n^"\n",src=[],dst=[],jump=SOME l})
 			| JUMP (_, l) 						=> emit (OPER {assem="No deberia pasar (jump)\n",src=[],dst=[],jump=SOME l})
 			| CJUMP (oper,CONST i,CONST j,l1,l2)=> let val res = case oper of
@@ -214,21 +214,21 @@ let
 
 
 
-		| munchArgs (n,(BINOP(PLUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[natToReg n],jump=NONE});
+		| munchArgs (n,(BINOP(PLUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=natToReg n});
                                                                               emit (OPER {assem ="addq %'s0, %'d0\n",src=[munchExp e1,natToReg n], dst=[natToReg n],jump=NONE}))
-								 else ((result (fn r => (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[r],jump=NONE});
+								 else ((result (fn r => (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=r});
 	                                                                                      emit (OPER {assem ="addq %'s0, %'d0\n",src=[munchExp e1,r], dst=[r],jump=NONE});
 									                       emit (OPER{assem="pushq %'s0\n",src=[r,sp],dst=[sp],jump=NONE}))));()));munchArgs(n+1,xs))
 													
-		| munchArgs (n,(BINOP(MUL,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[natToReg n],jump=NONE});
+		| munchArgs (n,(BINOP(MUL,TEMP t,e1))::xs) = ((if (n<6) then (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=natToReg n});
                                                                               emit (OPER {assem ="imul %'s0, %'d0\n",src=[munchExp e1,natToReg n], dst=[natToReg n],jump=NONE}))
-								 else ((result (fn r => (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[r],jump=NONE});
+								 else ((result (fn r => (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=r});
 	                                                                                      emit (OPER {assem ="imul %'s0, %'d0\n",src=[munchExp e1,r], dst=[r],jump=NONE});
 									                       emit (OPER{assem="pushq %'s0\n",src=[r,sp],dst=[sp],jump=NONE}))));()));munchArgs(n+1,xs))
  
-		| munchArgs (n,(BINOP(MINUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[natToReg n],jump=NONE});
+		| munchArgs (n,(BINOP(MINUS,TEMP t,e1))::xs) = ((if (n<6) then (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=natToReg n});
                                                                               emit (OPER {assem ="subq %'s0, %'d0\n",src=[munchExp e1,natToReg n], dst=[natToReg n],jump=NONE}))
-								 else ((result (fn r => (emit (OPER {assem="movq %'s0, %'d0\n",src=[t], dst=[r],jump=NONE});
+								 else ((result (fn r => (emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=t, dst=r});
 	                                                                                      emit (OPER {assem ="subq %'s0, %'d0\n",src=[munchExp e1,r], dst=[r],jump=NONE});
 									                       emit (OPER{assem="pushq %'s0\n",src=[r,sp],dst=[sp],jump=NONE}))));()));munchArgs(n+1,xs))
 
