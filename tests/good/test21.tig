@@ -13,17 +13,17 @@ let
 
     function printboard () =
        (for i := 0 to N-1
-		 do (print("Itero en i\n");
+		 do 
 			(for j := 0 to N-1
-			  do (print("Itero en j\n");
+			  do 
 				 print (if col[i]=j then " O" else " .");
-				 print ("\n")));
-				 print ("\n")))
+				 print ("\n"));
+				 print ("\n"))
 
     function try (c : int) =
 (
      if c=N
-     then (print("Llamo a printboard()\n");printboard ())
+     then printboard ()
      else for r := 0 to N-1
 	   do if row[r]=0 & diag1[r+c]=0 & diag2[r+7-c]=0
 	           then (row[r] :=1; diag1[r+c] :=1; diag2[r+7-c] :=1;

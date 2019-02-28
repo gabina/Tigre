@@ -113,6 +113,7 @@ void _checkIndexArray(long *a, long i)
 		exit(-1);
 	}
 }
+
 long *_allocRecord(long ctos, ...)
 {
     int i;

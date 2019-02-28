@@ -1,5 +1,0 @@
-let type r = {a: int, b: r}
-	var x = r {a=0,b=nil}
-in x.b
-
-sjdkas
