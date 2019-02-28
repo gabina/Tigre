@@ -35,6 +35,12 @@ struct
 		
 	fun printSet s = printList(listItems s)								
 	
+	fun updateProlEpil(f,l) = 
+	let
+		val lWhitoutProl = tl(tl(tl l))
+		val lWhitoutProlEpil = rev( tl(tl(tl (rev lWhitoutProl))))
+	in tigerframe.procEntryExit3 (f,lWhitoutProlEpil) end	
+	
 	(*FUNCIONES PARA COALESCE*)    
     (* getAlias: tigertemp.temp -> tigertemp.temp *)
     fun getAlias (t) = if member(!coalescedNodes,t) then getAlias(buscoEnTabla(t,!alias)) else t

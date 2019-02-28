@@ -10,23 +10,6 @@ open tigerit
 fun sortArgs xs = if length xs > 6 then (List.take(xs,6)) @ rev(List.drop(xs,6)) else xs
 
 fun its n =  if n<0 then "-" ^ Int.toString(~n) else Int.toString(n) 
-
-fun procEntryExit2 (f : tigerframe.frame,body : instr list) =  
-					let
-					    val isMain = (tigerframe.name f) = "_tigermain"
-					    fun store r = 
-							let 
-								val newTemp = newtemp()
-							in (tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst=newTemp,src=r},newTemp) end
-						val (storeList,tempList) = ListPair.unzip (map store tigerframe.calleesaves')
-						val fetchTemps = ListPair.zip (tempList, tigerframe.calleesaves')
-						fun fetch (t,c) = tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst=c,src=t}
-						val fetchList = map fetch fetchTemps
-						val i = 1024
-						val prol = [OPER {assem = "pushq %'s0\n",src=["rbp",sp],dst=[sp],jump=NONE},tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst="rbp",src="rsp"},OPER {assem="subq $"^its(i)^", %'d0\n",src=["rsp"],dst=["rsp"],jump=NONE}]
-						val epil = [tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst="rsp",src="rbp"},OPER {assem = "pop %'d0\n",src=[sp],dst=["rbp",sp],jump=NONE},OPER {assem = "ret\n",src=[],dst=[],jump=NONE}]
-						val ret = OPER {assem = "ret\n",src=[],dst=[],jump=NONE}
-				   in  if isMain then prol@body@epil(*body@[ret]*) else prol@storeList@body@fetchList@epil end	
 				   
 fun codeGen (frame: tigerframe.frame) (stm:tigertree.stm) : tigerassem.instr list =
 let
@@ -43,6 +26,13 @@ let
 		| natToReg 4 = tigerframe.r8
 		| natToReg 5 = tigerframe.r9
 		| natToReg _ = raise Fail "No deberia pasar (natToReg)"
+		
+	(*Esta función agrega la instrcción movq $0,%rax en caso de que se esté llamando a una funcion del runtime con argumentos variables *)
+	(* La única que hay es _allocRecord*)	
+	fun prepareCall name = 
+		case name of
+			"_allocRecord" =>  emit (OPER {assem="movq $0, %'d0\n",src=[],dst=["rax"],jump=NONE})
+			| _ => ()
 
 	fun munchStm s = 
 		case s of
@@ -54,7 +44,7 @@ let
 		                                           in ((emit (OPER {assem="movq (%'s0), %'d0\n",src=[munchExp e2],dst=[t],jump=NONE}));
 												        emit (OPER {assem="movq %'s0, (%'s1)\n",src=[t,munchExp e1],dst=[],jump=NONE}))
 												   end
-			| MOVE (TEMP t, CALL(NAME e,args)) 	=> (munchArgs (0,sortArgs args); emit (OPER {assem="call "^e^"\n",src=[sp],dst=callersaves,jump=NONE}); 
+			| MOVE (TEMP t, CALL(NAME e,args)) 	=> (munchArgs (0,sortArgs args);prepareCall e ;emit (OPER {assem="call "^e^"\n",src=[sp],dst=callersaves,jump=NONE}); 
 																		emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=rv,dst=t}))							   
 			| MOVE (MEM(e1),e2) 				=> emit (OPER {assem="movq %'s0, (%'s1)\n",src=[munchExp e2,munchExp e1],dst=[],jump=NONE})
 			| MOVE (TEMP t,e2) 					=> emit (tigerassem.MOVE {assem="movq %'s0, %'d0\n",src=(munchExp e2),dst=t})
@@ -121,7 +111,7 @@ let
 										 	           emit (OPER {assem=res^" "^l1^"\n",src=[],dst=[],jump=SOME [l1,l2]}))
 										           end
 			| LABEL lab 						=> emit (tigerassem.LABEL {assem=lab^":\n",lab=lab})
-			| EXP (CALL (NAME n,args)) 			=> (munchArgs(0,sortArgs args);(emit (OPER {assem="call "^n^"\n",src=[sp],dst=callersaves,jump=NONE})))
+			| EXP (CALL (NAME n,args)) 			=> (munchArgs(0,sortArgs args);prepareCall n ;emit (OPER {assem="call "^n^"\n",src=[sp],dst=callersaves,jump=NONE}))
 			| EXP (CALL (e,args)) 				=> raise Fail "No deberia pasar (call)\n"
 			| _ 								=> emit (OPER {assem = "No hay mas casos (munchStm)\n",src=[],dst=[],jump=NONE})
 		     

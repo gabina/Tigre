@@ -18,7 +18,8 @@
 structure tigerframe :> tigerframe = struct
 
 open tigertree
-
+open tigerassem
+open tigertemp
 (*type level = int*)
 
 val fp = "rbp"				(* frame pointer *)
@@ -51,7 +52,12 @@ val callersaves = [rv,rcx,rdx,rsi,rdi,r8,r9,"r10", "r11"]
 val calleesaves = ["rbx", fp, sp, "r12", "r13", "r14", "r15"]
 val calleesaves' = ["rbx", "r12", "r13", "r14", "r15"]
 val registers = [rv,"rbx",rcx,rdx,rsi,rdi,fp,sp,r8,r9,"r10","r11","r12","r13","r14","r15"]
+val registersSet = Splayset.addList (Splayset.empty String.compare, registers) 
 val K = length registers
+
+val MAX_ARGS = 15
+val MAX_ARGS_REG = 6
+val MAX_ARGS_STACK = MAX_ARGS - MAX_ARGS_REG
 
 fun its n =  if n<0 then "-" ^ Int.toString(~n) else Int.toString(n) 
 
@@ -100,11 +106,11 @@ fun allocArg (f: frame) b =
 	let val acc = 
 		(case b of
 		true =>
-			let	val _ = print("allocARg InFrame \n")
+			let	(*val _ = print("allocARg InFrame \n")*)
 				val ret = (argsOffInicial-(!(#actualArg f)*wSz))
 				val _ = #actualArg f := !(#actualArg f)+1
 			in	InFrame ret end
-		| false => (print("allorArg InReg \n");InReg(tigertemp.newtemp())))
+		| false => ((*print("allorArg InReg \n");*)InReg(tigertemp.newtemp())))
 	in (#arguments f := !(#arguments f) @ [acc];acc) end
 	(* malloc *)
 
@@ -148,10 +154,53 @@ fun procEntryExit1 (f : frame,body) =
 						| natToReg 5 = r9
 						| natToReg _ = raise Fail "No deberia pasar (natToReg)"				
 						
-						fun accToMove ((InReg t),n) = if n<6 then ((*print("inreg <6\n");*)MOVE (TEMP t,TEMP (natToReg n))) else MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap)))) (*A partir del fp hay que sumar porque estamos queriendo acceder a la pila del llamante*)
-						  | accToMove ((InFrame k),n) = if n<6 then ((*print("inframe <6  "^its(k)^"\n");*)MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n))) else MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))                                         						
+						fun accToMove ((InReg t),n) = if n<6 then ((*print("inreg <6\n");*)tigertree.MOVE (TEMP t,TEMP (natToReg n))) else tigertree.MOVE(TEMP t,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap)))) (*A partir del fp hay que sumar porque estamos queriendo acceder a la pila del llamante*)
+						  | accToMove ((InFrame k),n) = if n<6 then ((*print("inframe <6  "^its(k)^"\n");*)tigertree.MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,TEMP (natToReg n))) else tigertree.MOVE (MEM(BINOP(PLUS, TEMP(fp), CONST k)) ,MEM(BINOP(PLUS, TEMP(fp), CONST (offArgs + (n-6)*localsGap))))                                         						
 				   in  if isMain then body else SEQ (seq (map accToMove lacc),body) end
-				   
-			   
-end
 
+fun procEntryExit2 (f : frame,body : instr list) =  
+                    let
+						val _ = print("En procEntryExit2\n")
+                        val isMain = (name f) = "_tigermain"
+                     in case isMain of 
+                        false => (let fun store r = 
+										let 
+											val newTemp = tigertemp.newtemp()
+											val _ = print(newTemp^" ")
+										in (tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst=newTemp,src=r},newTemp) end
+									val (storeList,tempList) = ListPair.unzip (map store calleesaves')
+									val fetchTemps = ListPair.zip (tempList, calleesaves')
+									fun fetch (t,c) = tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst=c,src=t}
+									val fetchList = map fetch fetchTemps
+									val _ = print "\n"
+								in storeList@body@fetchList end) 
+						| true => body end
+	
+fun pow2 0 = 1
+	| pow2 n = 2*(pow2 (n-1))
+
+fun pot2 n i = let val m = pow2 i
+				in if n <= m then m else pot2 n (i+1) end
+				
+														   
+fun procEntryExit3 (f: frame,body : instr list) =  
+					let
+                    	(* Calculo la cantidad de espacio del frame*)
+						(*argumentos                (_)
+				    	  MAX_ARGS_PILA outcoming   (9)
+						  static link				(1)
+     					  variables locales         (_)*)
+						val argsByStack = if length(getFormals f) > 6 then (length(getFormals f) - 6) else 0
+						(*val cant = argsByStack + MAX_ARGS_STACK + 1 + !(#actualLocal f)
+						val space = (if (Int.mod(cant, 2) = 0) then cant else cant+1)*16*)
+						val space = (argsByStack + MAX_ARGS_STACK + 1 + !(#actualLocal f))*8
+						val prol = [OPER {assem = "pushq %'s0\n",src=["rbp",sp],dst=[sp],jump=NONE},
+									tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst="rbp",src="rsp"},
+									OPER {assem="subq $"^its(space)^", %'d0\n",src=["rsp"],dst=["rsp"],jump=NONE}]
+						val epil = [tigerassem.MOVE {assem="movq %'s0, %'d0\n",dst="rsp",src="rbp"},
+									OPER {assem = "pop %'d0\n",src=[sp],dst=["rbp",sp],jump=NONE},
+									OPER {assem = "ret\n",src=[],dst=[],jump=NONE}]
+					in prol@body@epil end
+						
+end
+						
