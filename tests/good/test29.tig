@@ -1,0 +1,25 @@
+let
+  type list = {i : string, tail : list}
+
+  var a : list := nil
+  function cons (a : string, l : list) : list =
+    list {i = a, tail = l}
+
+  function head (l : list) : string = l.i
+
+  function tail (l : list) : list =
+    l.tail
+
+
+
+  var x : list := cons("a", cons ("b", cons("c", a)))
+
+
+  function printlist (l : list) =
+    if l = nil
+    then print ("\n")
+    else (print (head(l)); print (" "); printlist(tail(l)))
+
+in
+  (printlist(x);0)
+end

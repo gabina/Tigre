@@ -113,6 +113,7 @@ let
 			| LABEL lab 						=> emit (tigerassem.LABEL {assem=lab^":\n",lab=lab})
 			| EXP (CALL (NAME n,args)) 			=> (munchArgs(0,sortArgs args);prepareCall n ;emit (OPER {assem="call "^n^"\n",src=[sp],dst=callersaves,jump=NONE}))
 			| EXP (CALL (e,args)) 				=> raise Fail "No deberia pasar (call)\n"
+      | EXP e 							              => emit (tigerassem.MOVE {assem = "movq %'s0, %'d0",src = munchExp e,dst = tigertemp.newtemp()})      
 			| _ 								=> emit (OPER {assem = "No hay mas casos (munchStm)\n",src=[],dst=[],jump=NONE})
 		     
 	and munchExp e = 

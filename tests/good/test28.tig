@@ -1,0 +1,26 @@
+let
+  type  arrtype = array of int
+  var length := 10
+  var arr2 : arrtype := arrtype [length] of 80
+  var arr1 : arrtype := arrtype [length] of 70
+  var arr2 : arrtype := arrtype [length] of 90
+
+
+  function printint (i : int) =
+    let function f (i : int) =
+         if i > 0
+ 	then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+    in if i < 0 then (print ("-"); f (-i))
+       else if i>0 then f (i)
+       else print ("0")
+    end
+
+  function printarr(arr : arrtype) =
+   for i :=0 to (length-1)
+   do (printint(arr[i]); print("-"))
+
+in
+  arr1[9] := 72;
+  printarr(arr1);
+  0
+end

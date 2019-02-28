@@ -1,0 +1,8 @@
+let
+  var a := getchar()
+  var b := getchar()
+in
+  print ("----"); print(a); print ("----\n");
+  print ("----"); print(b); print ("----\n");
+  0
+end

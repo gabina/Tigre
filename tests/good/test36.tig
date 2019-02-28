@@ -1,0 +1,12 @@
+let
+  function f() : int =
+    let
+      var a := 10
+      var b := 72
+      function g() : int = a + b
+    in
+      g()
+    end
+in
+  if f() = 82 then print ("OK") else print ("NO OK");0
+end

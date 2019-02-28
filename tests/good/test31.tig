@@ -1,0 +1,8 @@
+let
+  type list = {i : int, tail : list}
+  function cons (a : int, l : list) : list =
+    list {i = a, tail = l}
+  var x : list := cons(70, nil)
+in
+  x.i
+end
