@@ -1,0 +1,11 @@
+let
+   var a := 1
+   var n := 4
+   function f() : int = a + a + a + a + a
+   var b := 0
+in
+  for i := 0 to n-1
+  do for j := 0 to n-1
+     do b := b + f()
+  ; b
+end

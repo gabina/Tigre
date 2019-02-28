@@ -1,0 +1,34 @@
+let
+  type list = {first : int, rest : list}
+
+  function concat (a : list, b : list) : list =
+    if a = nil then b
+    else if b = nil then a
+    else list {first = a.first, rest = concat(a.rest, b)}
+
+  var a : list := list {first = 70, rest = list {first = 71, rest = list {first = 144, rest = nil}}}
+  var b : list := list {first = 72, rest = list {first = 64, rest = list {first = 112, rest = nil}}}
+
+  function merge (a : list, b : list) : list =
+    if a = nil then b
+    else if b = nil then a
+    else if a.first < b.first
+       then list {first = a.first, rest = merge (a.rest, b)}
+       else list {first = b.first, rest = merge (a, b.rest)}
+
+   function printint (i : int) =
+     let function f (i : int) =
+          if i > 0
+  	then (f (i/10); print (chr (i-i/10*10+ord ("0"))))
+     in if i < 0 then (print ("-"); f (-i))
+        else if i>0 then f (i)
+        else print ("0")
+     end
+
+   function printlist (l : list) =
+     if l = nil then print ("\n")
+     else (printint (l.first); print (" "); printlist (l.rest))
+in
+  printlist(merge(b,a));
+  0
+end

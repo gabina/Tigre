@@ -84,11 +84,17 @@ fun main(args) =
 			| asmStrings ((lab,s)::xs) =  let
 											val fstLetter = str(hd(String.explode lab))
 											val options = if s = "" then (if fstLetter = "L" then 1 else 0) else 1
-											val size = Int.toString(String.size s)
+											val sizeInt = String.size s
+											val sizeStr = Int.toString(sizeInt)											
+											val cond = (String.isSuffix ("\\x0a") s)
+											(*si contiene como caracteres finales \\x0a los extraigo y en su lugar pongo \n*)
+											val s' = if cond then String.substring(s,0,sizeInt-4)^"\\n" else s
+											(*si contiene como caracteres finales \\x0a modifico la longitud que ahora sera la del verdadero str + 1 del \n*)
+											val sizeStr' = if cond then Int.toString(sizeInt-3) else sizeStr
 										 in
 											case options of
 												0 => (asmStrings xs)
-												| 1 => (".align 16\n.type "^lab^", @object\n.size "^lab^", 16\n"^lab^":\n\t.quad "^size^"\n\t.ascii \""^s^"\"\n\n")^(asmStrings xs)
+												| 1 => (".align 16\n.type "^lab^", @object\n.size "^lab^", 16\n"^lab^":\n\t.quad "^sizeStr'^"\n\t.ascii \""^s'^"\"\n\n")^(asmStrings xs)
 										end
 		(* funcion auxiliar, aplica el generador de codigo assembler (tigermunch)*)
 			

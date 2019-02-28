@@ -1,0 +1,11 @@
+let
+  type list = {i : int, tail : list}
+  var a : list := nil
+  function cons (a : int, l : list) : list =
+    list {i = a, tail = l}
+  function head (l : list) : int =
+    l.i
+  var x : list := cons(70, cons (71, cons(72, a)))
+in
+  x.tail.tail;0
+end

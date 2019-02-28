@@ -1,0 +1,8 @@
+let
+  type a = {a : string, b : string}
+  type b = {b : string, r : a}
+
+  var x : b := b { b = "asd1", r = a { a= "asd2", b = "asd3" }}
+in
+  print (x.r.b) ; print ("\n") ; 0
+end

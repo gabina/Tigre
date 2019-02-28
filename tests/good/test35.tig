@@ -1,0 +1,10 @@
+let
+  var buffer := " "
+  var str := ""
+in
+  (while buffer <> "\n"
+  do (buffer := getchar();
+      str := concat (str, buffer)));
+  print ("------"); print (str); print ("--------");
+  0
+end

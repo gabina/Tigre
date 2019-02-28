@@ -1,0 +1,13 @@
+/* 1200  (176) */
+let
+  function f (a : int) : int =
+    let function g(b : int) : int =
+        let var pisalo := a + 150
+            var a := 1000
+            function h (a: int, b : int) : int = a + b
+        in h(pisalo + a, b)
+        end
+    in g(40)
+    end
+in f(10)
+end
